@@ -45,7 +45,7 @@ print(response['message']['content'])
 
 ## 🎻 로컬 개발자 협업 (Coder + Validator) 아키텍처
 
-Module 6의 실습 예제인 [ollama_orchestrator.py](file:///c:/Users/majun/Coding/anti/examples/ollama_orchestrator.py)는 두 로컬 에이전트의 피드백 루프를 모방하여 완결성 높은 소스코드를 점진적으로 빌드해 냅니다.
+Module 6의 실습 예제인 [ollama_orchestrator.py](file:///c:/Coding/AI-Engineering/examples/ollama_orchestrator.py)는 두 로컬 에이전트의 피드백 루프를 모방하여 완결성 높은 소스코드를 점진적으로 빌드해 냅니다.
 
 ```
                     ┌────────────────────────┐
@@ -81,7 +81,7 @@ Module 6의 실습 예제인 [ollama_orchestrator.py](file:///c:/Users/majun/Cod
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 실습 파일은 [examples/ollama_orchestrator.py](file:///c:/Users/majun/Coding/anti/examples/ollama_orchestrator.py)에 구성되어 있습니다.
+이 모듈과 연계되는 실습 파일은 [examples/ollama_orchestrator.py](file:///c:/Coding/AI-Engineering/examples/ollama_orchestrator.py)에 구성되어 있습니다.
 
 ### 실습 절차
 1. 로컬 환경에 Ollama를 켜고 `ollama run qwen2.5-coder` 명령어로 모델을 준비합니다.

@@ -18,7 +18,7 @@ AI 엔지니어링 업계에서 널리 활용되는 대표적인 에이전트 �
 *   마스터 에이전트가 입력된 미션을 바탕으로 여러 개의 하위 작업을 정의합니다.
 *   하위 에이전트들(Workers)은 자신에게 할당된 독립적인 영역을 구현하거나 조사합니다.
 *   마스터는 이들의 산출물을 모아 일관성 있는 최종 결과로 합성(Synthesis)합니다.
-*   이 교육 과정의 실습인 [orchestrator.py](file:///c:/Users/majun/Coding/anti/examples/orchestrator/orchestrator.py)가 이 패턴을 재현합니다.
+*   이 교육 과정의 실습인 [orchestrator.py](file:///c:/Coding/AI-Engineering/examples/orchestrator/orchestrator.py)가 이 패턴을 재현합니다.
 
 ### 3. 플래너-실행기 (Planner-Executor) 패턴
 *   먼저 전체 작업을 수행할 논리적 단계들의 '계획(Plan)'을 세웁니다.
@@ -63,9 +63,9 @@ AI 엔지니어링 업계에서 널리 활용되는 대표적인 에이전트 �
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 실습 파일은 [examples/orchestrator/orchestrator.py](file:///c:/Users/majun/Coding/anti/examples/orchestrator/orchestrator.py)에 생성되어 있습니다.
+이 모듈과 연계되는 실습 파일은 [examples/orchestrator/orchestrator.py](file:///c:/Coding/AI-Engineering/examples/orchestrator/orchestrator.py)에 생성되어 있습니다.
 
 ### 실습 절차
-1. [examples/orchestrator/orchestrator.py](file:///c:/Users/majun/Coding/anti/examples/orchestrator/orchestrator.py)를 열어 전체적인 코드를 파악합니다.
+1. [examples/orchestrator/orchestrator.py](file:///c:/Coding/AI-Engineering/examples/orchestrator/orchestrator.py)를 열어 전체적인 코드를 파악합니다.
 2. 이 스크립트는 `Gemini` API 키 없이도 실행 흐름을 쉽게 파악할 수 있도록 모의(Mock) 에이전트 호출 루프를 포함하고 있습니다.
 3. 터미널 창을 열고 `python examples/orchestrator/orchestrator.py` 명령을 실행하여 마스터 에이전트가 기획 에이전트와 작성 에이전트를 차례대로 소환하고 일련의 보고서를 오케스트레이션하여 산출하는 시뮬레이션을 눈으로 확인해 봅니다.

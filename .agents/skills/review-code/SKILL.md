@@ -28,10 +28,9 @@ description: "Guidelines and instructions for code review of python and markdown
 ## 📝 출력 보고서 포맷
 리뷰 결과는 다음 형식을 갖춘 **마크다운(Markdown)** 테이블 및 목록 형식으로 한글로 제공하십시오:
 
-```markdown
-## 🔍 코드 리뷰 요약 보고서
+### 🔍 코드 리뷰 요약 보고서
 
-### 📊 종합 요약 테이블
+#### 📊 종합 요약 테이블
 | 항목 | 상태 (Good / Warning / Danger) | 주요 지적 사항 |
 | :--- | :--- | :--- |
 | 네이밍 및 가독성 |  |  |
@@ -39,7 +38,7 @@ description: "Guidelines and instructions for code review of python and markdown
 | 예외 처리 안전성 |  |  |
 | 성능 및 아키텍처 |  |  |
 
-### 🛠️ 세부 피드백 및 권장 수정 사항
+#### 🛠️ 세부 피드백 및 권장 수정 사항
 1. **[네이밍] (파일명/라인 넘버)**
    *   **현상**: `...`
    *   **수정 방향**: `...`
@@ -47,6 +46,5 @@ description: "Guidelines and instructions for code review of python and markdown
    *   **현상**: `...`
    *   **수정 방향**: `...`
 
-### 💡 리팩토링 예시 코드
+#### 💡 리팩토링 예시 코드
 *(더 나은 가독성이나 안전성을 위해 수정한 코드 블록 제공)*
-```

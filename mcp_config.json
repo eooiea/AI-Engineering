@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "system-utility-server": {
+      "command": "python",
+      "args": [
+        "c:/Coding/AI-Engineering/examples/mcp_server.py"
+      ]
+    }
+  }
+}

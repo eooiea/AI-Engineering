@@ -51,9 +51,9 @@ if __name__ == "__main__":
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 실습 파일은 [examples/sdk_agent.py](file:///c:/Users/majun/Coding/anti/examples/sdk_agent.py)에 생성되어 있습니다.
+이 모듈과 연계되는 실습 파일은 [examples/sdk_agent.py](file:///c:/Coding/AI-Engineering/examples/sdk_agent.py)에 생성되어 있습니다.
 
 ### 실습 절차
-1. [examples/sdk_agent.py](file:///c:/Users/majun/Coding/anti/examples/sdk_agent.py) 파일을 열어 SDK 패키지를 임포트하여 에이전트를 생성하는 전체 소스코드를 살펴봅니다.
+1. [examples/sdk_agent.py](file:///c:/Coding/AI-Engineering/examples/sdk_agent.py) 파일을 열어 SDK 패키지를 임포트하여 에이전트를 생성하는 전체 소스코드를 살펴봅니다.
 2. 터미널 창을 열고 `python examples/sdk_agent.py` 명령을 실행합니다.
 3. 로컬 에이전트가 정상적으로 구동되고, 로컬 Workspace 컨텍스트를 파악해 응답하는 과정을 콘솔 화면에서 확인합니다.

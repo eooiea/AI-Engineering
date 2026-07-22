@@ -1,3 +1,7 @@
+"""Ollama Local Model Multi-Agent Orchestration Module.
+
+Ollama SDK 및 qwen2.5-coder 로컬 LLM을 기반으로 Coder와 Validator 에이전트 간 피드백 코딩 루프를 실행합니다.
+"""
 import os
 import socket
 import sys
@@ -29,7 +33,7 @@ def check_model_installed(model_name: str) -> bool:
             if model_name in name:
                 return True
         return False
-    except Exception:
+    except (OSError, AttributeError, KeyError):
         return False
 
 

@@ -1,3 +1,7 @@
+"""System & Utility MCP Server Module.
+
+FastMCP 패키지를 사용하여 OS 정보, 제곱 계산, 날씨 조회 도구 및 리소스를 제공합니다.
+"""
 import platform
 from fastmcp import FastMCP
 

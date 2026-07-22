@@ -39,9 +39,9 @@
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 실습 파일은 [examples/harness/eval_harness.py](file:///c:/Users/majun/Coding/anti/examples/harness/eval_harness.py)에 생성되어 있습니다.
+이 모듈과 연계되는 실습 파일은 [examples/harness/eval_harness.py](file:///c:/Coding/AI-Engineering/examples/harness/eval_harness.py)에 생성되어 있습니다.
 
 ### 실습 절차
-1. [examples/harness/eval_harness.py](file:///c:/Users/majun/Coding/anti/examples/harness/eval_harness.py) 파일을 열어 규칙 기반의 Assertion 테스터 작동 방식을 확인합니다.
+1. [examples/harness/eval_harness.py](file:///c:/Coding/AI-Engineering/examples/harness/eval_harness.py) 파일을 열어 규칙 기반의 Assertion 테스터 작동 방식을 확인합니다.
 2. 터미널 창을 열고 `python examples/harness/eval_harness.py` 명령을 실행합니다.
 3. 테스트 러너가 복수의 모의 답변(예: JSON 형식 답변, 부적절한 글자 수의 답변 등)들을 상대로 지정된 규칙(JSON 검증, 정규식 검증, 단어 포함 여부)을 평가하고 테스트 성공/실패 여부를 리포트 형태로 상세히 출력하는 것을 직접 확인합니다.

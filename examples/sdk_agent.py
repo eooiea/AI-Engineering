@@ -1,3 +1,7 @@
+"""Google Antigravity SDK Agent Execution Module.
+
+google-antigravity SDK를 사용하여 현재 워크스페이스 컨텍스트에서 자율적으로 파일 탐색 및 요약을 수행하는 에이전트 예제입니다.
+"""
 import asyncio
 import os
 import sys
@@ -11,6 +15,7 @@ except ImportError as e:
     IMPORT_ERROR = e
 
 async def run_agent():
+    """Antigravity Agent 세션을 가동하여 워크스페이스 내 문서 분석 태스크를 구동합니다."""
     print("[SDK-Agent] 에이전트 초기화 프로세스 시작...")
     
     # 1. SDK 존재 여부 체크
@@ -52,10 +57,11 @@ async def run_agent():
     try:
         # 현재 디렉토리 컨텍스트를 활용하도록 설정
         config = LocalAgentConfig()
+        current_cwd = os.getcwd()
         
         print("[SDK-Agent] Agent 인스턴스를 생성하고 세션을 엽니다.")
         async with Agent(config) as agent:
-            prompt = "현재 워크스페이스(c:\\Users\\majun\\Coding\\anti)에 작성되어 있는 학습용 markdown 파일 목록을 확인하고, 각 파일이 어떤 모듈을 다루고 있는지 리포트로 요약해줘."
+            prompt = f"현재 워크스페이스({current_cwd})에 작성되어 있는 학습용 markdown 파일 목록을 확인하고, 각 파일이 어떤 모듈을 다루고 있는지 리포트로 요약해줘."
             print(f"\n[SDK-Agent] 에이전트 질문 전송:\n'{prompt}'\n")
             
             # 에이전트와 대화 수행

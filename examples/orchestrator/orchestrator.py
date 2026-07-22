@@ -1,6 +1,13 @@
+"""Multi-Agent Master-Worker Orchestration Module.
+
+Gemini API 또는 Mock 에이전트를 조율하여 보고서 아웃라인 기획 및 본문을 연계 작성합니다.
+"""
 import os
 import sys
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 # google-genai 라이브러리 연동 시도
 try:
@@ -12,7 +19,13 @@ except ImportError:
 
 class AgentWorker:
     """하위 에이전트들의 공통 인터페이스를 정의하는 베이스 클래스"""
+
     def __init__(self, role: str, system_instruction: str):
+        """에이전트 워커를 초기화합니다.
+
+        :param role: 에이전트의 역할 식별 이름
+        :param system_instruction: 에이전트에 부여할 시스템 지침
+        """
         self.role = role
         self.system_instruction = system_instruction
         self.client = None
@@ -22,8 +35,8 @@ class AgentWorker:
             try:
                 # API Key는 genai.Client가 내부적으로 os.environ["GEMINI_API_KEY"]를 탐색합니다.
                 self.client = genai.Client()
-            except Exception as e:
-                print(f"[Warning] API 클라이언트 초기화 실패 ({e}). Mock 모드로 대체 실행합니다.")
+            except (ValueError, RuntimeError, AttributeError) as e:
+                logger.warning(f"[{self.role}] API 클라이언트 초기화 실패 ({e}). Mock 모드로 대체 실행합니다.")
                 self.client = None
 
     def execute(self, prompt: str) -> str:

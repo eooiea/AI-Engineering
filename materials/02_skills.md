@@ -1,61 +1,114 @@
-# 🧠 Module 2: Antigravity Custom Skills
+# 🧠 Module 2: Antigravity Customization System (AGENTS.md & Custom Skills)
 
-Antigravity IDE의 **커스텀 스킬 (Custom Skills)** 시스템은 코딩 수정 없이 프롬프트 명령어와 지침(System Instructions)만을 정의하여 에이전트의 작동 방식을 로컬 혹은 프로젝트 단위로 확장할 수 있는 매우 강력한 기능입니다.
+Antigravity IDE의 **Customization System**은 코드 수정 없이 마크다운 문서만으로 에이전트의 작동 방식, 코딩 컨벤션, 전문 수행 절차를 제어하는 강력한 프롬프트 오케스트레이션 기능입니다.
 
-사용자가 지시한 개발 작업의 문맥과 일치하는 스킬이 자동 감지(Auto-Discovery)되면, 해당 스킬에 기술된 정교한 규칙과 가이드라인이 에이전트의 상황 인지 버퍼에 즉각 탑재됩니다.
+Antigravity 시스템은 크게 **상시 전역 규칙(`AGENTS.md`)**과 **동적 커스텀 스킬(`SKILL.md`)**이라는 두 가지 축으로 에이전트를 통제합니다.
 
 ---
 
-## 📂 스킬의 폴더 구조와 위치
+## 📌 Part 1: 전역 상시 규칙 (AGENTS.md)
 
-스킬은 다음 두 가지 **Customization Roots** 아래에 배치할 수 있습니다.
+### 1. `AGENTS.md` 란?
+`AGENTS.md`는 에이전트가 작동할 때 **가장 먼저 읽어서 대화 내내 시스템 프롬프트(System Prompt) 버퍼에 고정(Pin)해 두고 들고 가는 '상시 행동 규칙서'**입니다.
 
-1. **Global Customizations Root** (모든 프로젝트에 범용 적용):
-   *   경로: `C:\Users\<사용자이름>\.gemini\config\skills\`
-2. **Workspace Customizations Root** (현재 프로젝트에만 적용):
-   *   경로: 프로젝트 루트 밑의 `.agents/skills/`
+### 2. 위치 및 적용 범위 (Customization Roots)
+* **Global Rules (모든 프로젝트 범용 적용)**:
+  * 경로: `C:\Users\<사용자명>\.gemini\config\AGENTS.md`
+* **Workspace Rules (현재 프로젝트에만 적용)**:
+  * 경로: 프로젝트 루트 아래 **[.agents/AGENTS.md](file:///c:/Coding/AI-Engineering/.agents/AGENTS.md)**
 
-### 개별 스킬 구조 예시
+### 3. 실제 작성 예시 ([.agents/AGENTS.md](file:///c:/Coding/AI-Engineering/.agents/AGENTS.md))
+```markdown
+# 🤖 Antigravity Workspace Global Rules
+
+## 📌 전역 개발 수칙
+1. **언어 정책**: 모든 대화 답변, 주석, 문서화는 정중한 한글로 작성합니다.
+2. **코드 스타일**: Python 코드는 PEP 8 표준(snake_case 변수/함수명, PascalCase 클래스명)을 엄격히 준수합니다.
+3. **안전한 예외 처리**: 포괄적인 `except Exception:` 캐칭을 피하고 구체적인 예외 클래스를 사용합니다.
+4. **자동화 검증**: 코드 수정 후에는 관련 검사 스크립트나 테스터를 실행하여 동작을 검증합니다.
+```
+
+---
+
+## 🧠 Part 2: 동적 커스텀 스킬 (Custom Skills & SKILL.md)
+
+### 1. `SKILL.md` 란?
+특정 업무(예: 코드 리뷰, DB 마이그레이션, UI 테스트 등)를 수행할 때 필요한 **전문 작업 지침서**입니다.
+
+### 2. 동적 탐색 (Auto-Discovery) & On-Demand 로딩
+모든 지침을 `AGENTS.md`에 넣어두면 컨텍스트 메모리(토큰)가 낭비됩니다. 반면 `SKILL.md`는 평소에는 상단 메타데이터 요약(`name`, `description`)만 가볍게 들고 다니다가, 사용자가 관련 명령을 지시하면 **그 순간 필요한 스킬의 본문만을 컨텍스트 윈도우에 동적으로 불러옵니다.**
+
+### 3. 스킬의 폴더 구조
 ```
 .agents/skills/review-code/
-├── SKILL.md                 <-- 핵심 스킬 정의 파일 (YAML Frontmatter + 지침)
-├── scripts/                 <-- (선택) 에이전트가 실행할 헬퍼 스크립트
-├── examples/                <-- (선택) 모범 개발 코드 예제
-└── references/              <-- (선택) 500줄을 초과하는 대형 참조용 명세나 API 문서
+├── SKILL.md                 <-- 메인 지침서 (YAML Frontmatter + 가이드라인)
+├── scripts/                 <-- 🛠️ (선택) 에이전트가 실행할 헬퍼 스크립트
+├── examples/                <-- 💡 (선택) 모범 개발 코드 예제
+└── references/              <-- 📚 (선택) 500줄을 초과하는 대형 참조용 명세나 API 문서
+```
+
+### 4. 헬퍼 자원 3종 구성 요소
+* **`scripts/` ([scripts/check_style.py](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/scripts/check_style.py))**: LLM 추론 오차를 줄이고 정적 검사를 0.1초 만에 수행하는 유틸리티 파이썬/쉘 스크립트.
+* **`examples/` ([examples/good_python_sample.py](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/examples/good_python_sample.py))**: 에이전트에게 지향하는 모범 코드 구현 패턴을 보여주는 예시.
+* **`references/` ([references/pep8_summary.md](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/references/pep8_summary.md))**: `SKILL.md` 본문이 500줄을 넘어가는 것을 막기 위해 분리한 세부 명세서.
+
+---
+
+## 🔄 Part 3: AGENTS.md vs SKILL.md 비교 & 메모리 전략
+
+| 구분 | **`AGENTS.md` (전역 규칙)** | **`SKILL.md` (커스텀 스킬)** |
+| :--- | :--- | :--- |
+| **주요 역할** | **모든 대화에 공통 적용되는 뼈대 수칙** | **특정 태스크 수행을 위한 전문 가이드라인** |
+| **로딩 방식** | **상시 로딩 (Always Pinned in Memory)** | **동적 호출 (On-Demand Loaded)** |
+| **컨텍스트 영향** | 상시 메모리를 차지하므로 핵심 규칙 위주 요약 | 필요 시만 불러오므로 토큰 효율성 극대화 |
+| **비유** | 회사 사규 / 기본 근무 수칙 | 특수 업무 매뉴얼 / 장비 가이드 |
+
+### 🛠️ 에이전트 실행 시 메모리 로딩 시퀀스
+
+```text
+[에이전트 구동]
+       │
+       ▼
+ 1. AGENTS.md 읽기 ──► (System Prompt 메모리에 상시 고정!)
+       │
+       ▼
+ 2. 사용자 질문 수신 ("이 코드 리뷰해줘")
+       │
+       ▼
+ 3. SKILL.md 요약 탐색 ──► review-code 스킬 매칭 감지!
+       │
+       ▼
+ 4. SKILL.md 본문 읽기 ──► (필요한 순간에만 컨텍스트에 동적 로드!)
+       │
+       ▼
+ 5. scripts/check_style.py 실행 후 최종 결과 보고서 작성
 ```
 
 ---
 
-## 📝 SKILL.md의 작성 규격
+## ⚡ Part 4: Antigravity 생산성 슬래시 명령어 (Slash Commands)
 
-스킬 정의 파일은 반드시 상단에 마크다운 **YAML Frontmatter** 형식을 갖추어 메타데이터를 기입해야 합니다. Antigravity 에이전트는 이 메타데이터를 사용하여 스킬을 동적으로 식별합니다.
+Antigravity IDE 대화창에서 `/`를 입력하면 에이전트의 작동 모드를 즉시 전환하거나 특수 태스크를 수행할 수 있는 4가지 핵심 슬래시 명령어를 제공합니다.
 
-```markdown
----
-name: "파이썬 코드 리뷰어 스킬"
-description: "파이썬 코드를 리뷰하고 PEP 8 규격을 준수하는지 점검하는 스킬"
----
-
-# 스킬 작동 지침
-에이전트가 파이썬 코드를 작성하거나 수정할 때 다음 사항을 강제하십시오:
-
-1. 모든 클래스와 공개 함수에는 docstring을 필수로 포함해야 합니다.
-2. 예외 처리는 `except Exception:`과 같은 포괄적 예외 지정을 금지하고 명확한 예외 타입을 지정합니다.
-3. 변수명은 snake_case, 클래스명은 PascalCase를 따릅니다.
-```
-
-### ⚠️ 핵심 작성 규칙
-*   **YAML Frontmatter**: `name`과 `description` 필드는 필수(Required) 항목이며, 에이전트가 이 내용을 기준으로 작업에 매칭할지 결정합니다.
-*   **분량 제한**: `SKILL.md` 본문은 에이전트 컨텍스트 손실을 막기 위해 **500줄 이하**로 유지해야 합니다. 방대한 참고자료가 있다면 `references/` 하위 디렉토리에 분할하여 에이전트가 원할 때 읽어가도록 설계하십시오.
-*   **자동 감지**: 표준 위치에 두면 즉시 탐색됩니다. 만약 외부 공유 드라이브 등 특수한 위치에 스킬을 두었다면, 최상위 customization root에 `skills.json`을 작성해 수동 등록해주어야 합니다.
+| 명령어 | 기능명 | 설명 및 사용처 |
+| :--- | :--- | :--- |
+| **`/goal`** | **목표 자율 달성 모드** | 목표가 100% 완료될 때까지 에이전트가 멈추지 않고 생각-실행-테스트 루프를 자율 전개 (장시간 작업 시 사용) |
+| **`/schedule`** | **타이머 & 크론 예약** | 일회성 알람 타이머 설정 또는 주기적인 정기 모니터링 태스크(Cron Job) 구동 |
+| **`/grill-me`** | **인터뷰 조율 모드** | 에이전트가 개발자에게 1:1로 질의응답을 던지며 요구사항 및 아키텍처 결정을 점진적으로 정렬 |
+| **`/learn`** | **노하우 자동 스킬화** | 해결된 버그 수정법이나 사용자의 교정 사항을 `SKILL.md` 또는 `AGENTS.md` 파일로 자동 추출하여 영구 기억 |
 
 ---
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 커스텀 스킬은 프로젝트 최상위의 [.agents/skills/review-code/SKILL.md](file:///c:/Users/majun/Coding/anti/.agents/skills/review-code/SKILL.md)에 생성되어 있습니다.
+이 모듈과 연계되는 전역 규칙 및 커스텀 스킬은 다음 위치에 생성되어 있습니다:
+* 프로젝트 규칙: [.agents/AGENTS.md](file:///c:/Coding/AI-Engineering/.agents/AGENTS.md)
+* 커스텀 스킬 1 (코드 리뷰): [.agents/skills/review-code/SKILL.md](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/SKILL.md)
+* 커스텀 스킬 2 (커밋 메시지): [.agents/skills/commit-msg/SKILL.md](file:///c:/Coding/AI-Engineering/.agents/skills/commit-msg/SKILL.md)
 
 ### 실습 절차
-1. [.agents/skills/review-code/SKILL.md](file:///c:/Users/majun/Coding/anti/.agents/skills/review-code/SKILL.md)를 열어 메타데이터와 프롬프트 가이드라인을 확인해 봅니다.
-2. 에이전트에게 "이 워크스페이스에 있는 python 코드에 대해 코드 리뷰를 해줘" 라고 지시합니다.
-3. 에이전트가 해당 명령을 받고 `review-code` 스킬의 가이드를 자동으로 감지하여 코드 리뷰 가이드 지침대로 리뷰 보고서를 한글로 이쁘게 작성해 주는지 확인합니다.
+1. [.agents/AGENTS.md](file:///c:/Coding/AI-Engineering/.agents/AGENTS.md) 파일을 열어 상시 고정되는 전역 개발 수칙을 확인합니다.
+2. [.agents/skills/review-code/SKILL.md](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/SKILL.md) 및 [.agents/skills/commit-msg/SKILL.md](file:///c:/Coding/AI-Engineering/.agents/skills/commit-msg/SKILL.md)를 열어 스킬 메타데이터와 작성 규격을 살펴봅니다.
+3. 에이전트 대화창에 다음과 같이 지시하여 커스텀 스킬의 반응을 테스트합니다:
+   * 💬 *"이 워크스페이스에 있는 python 코드에 대해 코드 리뷰를 해줘"* ➔ `review-code` 스킬 자동 로드
+   * 💬 *"로그인 기능 추가하고 문서 정리한 내용으로 커밋 메시지 작성해줘"* ➔ `commit-msg` 스킬 자동 로드 (멀티라인 `-m` 및 7대 Type 포맷 준수 확인)

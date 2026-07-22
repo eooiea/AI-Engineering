@@ -1,3 +1,7 @@
+"""Assertion-based Prompt Evaluation Harness Module.
+
+LLM 생성 응답 품질을 단언문(Assertion) 규칙 기반으로 정량 평가하는 테스트 러너 예제입니다.
+"""
 import json
 import re
 
