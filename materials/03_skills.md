@@ -2,6 +2,8 @@
 
 Antigravity IDE의 **Customization System**은 코드 수정 없이 마크다운 문서만으로 에이전트의 작동 방식, 코딩 컨벤션, 전문 수행 절차를 제어하는 강력한 프롬프트 오케스트레이션 기능입니다.
 
+> 💡 **Module 1~2와의 대조**: 앞선 모듈 1~2(MCP & LinkedIn API)가 에이전트에게 외부 세상과 연결하는 **'손과 발(Tools)'**을 달아준 것이라면, 이번 모듈 3의 Customization은 에이전트가 지켜야 할 **'상시 규칙(AGENTS.md)'과 '전문 업무 지침(SKILL.md)'**을 뇌에 탑재하는 파트입니다.
+
 Antigravity 시스템은 크게 **상시 전역 규칙(`AGENTS.md`)**과 **동적 커스텀 스킬(`SKILL.md`)**이라는 두 가지 축으로 에이전트를 통제합니다.
 
 ---
@@ -51,6 +53,30 @@ Antigravity 시스템은 크게 **상시 전역 규칙(`AGENTS.md`)**과 **동�
 * **`scripts/` ([scripts/check_style.py](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/scripts/check_style.py))**: LLM 추론 오차를 줄이고 정적 검사를 0.1초 만에 수행하는 유틸리티 파이썬/쉘 스크립트.
 * **`examples/` ([examples/good_python_sample.py](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/examples/good_python_sample.py))**: 에이전트에게 지향하는 모범 코드 구현 패턴을 보여주는 예시.
 * **`references/` ([references/pep8_summary.md](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/references/pep8_summary.md))**: `SKILL.md` 본문이 500줄을 넘어가는 것을 막기 위해 분리한 세부 명세서.
+
+### 5. 🔍 스킬 동적 탐색(Auto-Discovery) & 4단계 매칭 알고리즘
+
+AI IDE 백그라운드 오케스트레이터가 사용자의 질문을 받아 스킬을 주입하는 **4단계 내부 동작 파이프라인**입니다:
+
+```text
+[1단계: 인덱싱 (Indexing)]
+  └─► IDE 시동 시 .agents/skills/ 하위 SKILL.md의 YAML Frontmatter(name, description)만 0.001초 만에 인덱싱 (본문 미포함, 토큰 0% 소모)
+
+[2단계: 의도 매칭 (Intent Matching)]
+  └─► 사용자 질문("로그인 기능 추가하고 커밋 메시지 짜줘") 수신
+  └─► IDE Router가 질문 키워드/의도와 등록된 description("한국어 규칙 및 멀티라인 표준 준수 커밋 메시지 스킬") 간 유사도 분석 -> commit-msg 스킬 🎯 매칭!
+
+[3단계: 동적 본문 주입 (Dynamic Injection)]
+  └─► 매칭된 commit-msg/SKILL.md 본문 전문을 읽어서 LLM 'Triggered Custom Skills' 컨텍스트 영역으로 동적 주입!
+
+[4단계: 서브 자원 지연 실행 (Deferred Execution)]
+  └─► SKILL.md 지침에 따라 scripts/ 정적 파서를 실행하고, 필요 시 references/ 보조 문서를 추가 로드!
+```
+
+#### 💡 `SKILL.md` Frontmatter 작성 실전 꿀팁
+스킬 발동률을 100%로 높이려면 `description`에 사용자의 **의도, 목적, 대상 키워드**를 구체적으로 작성해야 합니다:
+* ❌ **모호한 작성**: `description: "코드 리뷰 스킬"` (매칭 실패 위험 높음)
+* ⭕ **명확한 작성**: `description: "Python 코드 스타일, PEP 8 준수, docstring 누락 및 예외 처리를 검사하고 한글 코드 리뷰 보고서를 작성하는 가이드라인 스킬"`
 
 ---
 

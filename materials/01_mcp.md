@@ -2,6 +2,8 @@
 
 Model Context Protocol (MCP)는 **AI 애플리케이션(Client/Host)**과 **외부 시스템/데이터 소스(Server)** 간의 안전하고 표준화된 연결을 제공하기 위해 Anthropic에 의해 제안된 오픈 소스 표준 프로토콜입니다.
 
+> 💡 **Module 0과의 연계**: [Module 0](file:///c:/Coding/AI-Engineering/materials/00_context_engineering.md)에서 배운 **Host-LLM-Tools** 구동 파이프라인 상에서, **Host(운영자 소프트웨어)가 외부 도구(Tools) 및 데이터 소스와 소통할 때 사용하는 세계 전역 공통 언어가 바로 MCP**입니다.
+
 AI 업계에서는 이를 **"AI 시대를 위한 USB-C 포트"**라고도 부릅니다. 과거에는 각 IDE나 챗봇마다 개별 데이터베이스나 API 연동 모듈을 별도로 짜야 했으나, MCP를 사용하면 표준 규격 하나로 다양한 AI 모델에 연결할 수 있습니다.
 
 ---
