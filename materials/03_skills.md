@@ -1,4 +1,4 @@
-# 🧠 Module 2: Antigravity Customization System (AGENTS.md & Custom Skills)
+# 🧠 Module 3: Customization System & Slash Commands
 
 Antigravity IDE의 **Customization System**은 코드 수정 없이 마크다운 문서만으로 에이전트의 작동 방식, 코딩 컨벤션, 전문 수행 절차를 제어하는 강력한 프롬프트 오케스트레이션 기능입니다.
 

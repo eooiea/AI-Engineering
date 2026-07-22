@@ -1,4 +1,4 @@
-# 🤖 Module 5: Antigravity SDK (google-antigravity)
+# ⚡ Module 6: Antigravity SDK Mastery (google-antigravity)
 
 **Google Antigravity SDK** (`google-antigravity`)는 에이전트형 개발 플랫폼인 Antigravity의 자율 추론 엔진 및 도구(Tool) 실행 프레임워크를 개발자가 자신의 Python 애플리케이션에 직접 임포트하여 제어할 수 있게 돕는 공식 라이브러리입니다.
 

@@ -1,4 +1,4 @@
-# 🎻 Module 3: Multi-Agent Orchestration (멀티 에이전트 오케스트레이션)
+# 🤖 Module 4: Multi-Agent Orchestration (멀티 에이전트 오케스트레이션)
 
 하나의 거대한 LLM에게 복잡하고 긴 미션을 한 번에 던져주면 컨텍스트 오류, 환각(Hallucination), 비합리적인 로직 설계 등의 한계에 부딪히기 쉽습니다. 
 

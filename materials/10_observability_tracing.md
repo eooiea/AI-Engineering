@@ -1,4 +1,4 @@
-# 👁️ Module 9: LLM Observability & Tracing
+# 👁️ Module 10: LLM Observability & Tracing
 
 **LLM Observability (관측 가능성)**는 복잡하게 호전되는 멀티 에이전트 및 도구 호출 루프에서 **어느 단계에서 병목(지연시간)이 발생하는지, 어느 에이전트가 토큰 비용을 폭증시키는지 분산 추적(Tracing)하고 디버깅**하는 필수 운영 메커니즘입니다.
 

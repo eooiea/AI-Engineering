@@ -1,4 +1,4 @@
-# 🐏 Module 6: Ollama Local Agent Collaboration
+# 🦙 Module 7: Ollama Local Agent Collaboration
 
 최근 AI 엔지니어링 생태계의 주요 트렌드 중 하나는 **개인 정보 보호(Privacy)**, **무상 유지 비용(No token costs)**, 그리고 **인터넷 독립성(Offline operation)**을 위해 **로컬 LLM**을 구축하여 에이전트를 구동하는 것입니다.
 

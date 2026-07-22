@@ -1,4 +1,4 @@
-# 🛡️ Module 8: Guardrails & AI Security
+# 🛡️ Module 9: Guardrails & AI Security
 
 **Guardrails (가드레일)** 시스템은 AI 에이전트가 실제 상용 서비스(Production) 환경에 배포될 때, 사용자 악의적 공격(Prompt Injection), 개인정보(PII) 유출, 및 비정상 출력을 실시간으로 차단하는 **필수 보안 레이어**입니다.
 

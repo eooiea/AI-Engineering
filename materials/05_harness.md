@@ -1,4 +1,4 @@
-# 🎯 Module 4: Evaluation and Harness (평가 하네스)
+# 🧪 Module 5: Evaluation & Harness
 
 인공지능 모델이 생성하는 결과물은 항상 동일하지 않고 비결정적(Non-deterministic)입니다. 프롬프트를 조금 고치거나 모델의 버전을 업그레이드하면, 이전에는 잘 되던 답변이 엉뚱하게 깨지는 **회귀(Regression) 현상**이 빈번하게 발생합니다.
 

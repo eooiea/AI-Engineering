@@ -1,4 +1,4 @@
-# 📚 Module 7: RAG & Vector DB Pipeline
+# 📚 Module 8: RAG & Vector DB Pipeline
 
 **RAG (Retrieval-Augmented Generation, 검색 증강 생성)**는 거대 언어 모델(LLM)이 최신 정보나 외부 사내 문서 데이터베이스를 실시간으로 검색하여 답변을 생성하도록 돕는 필수 엔터프라이즈 AI 아키텍처입니다.
 
