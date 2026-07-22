@@ -10,11 +10,13 @@
 
 ```mermaid
 graph TD
-    M1[1. Model Context Protocol] --> M2[2. Antigravity Custom Skills]
+    M0[0. AI IDE Architecture & Context Engineering] --> M1[1. Model Context Protocol]
+    M1 --> M2[2. Customization & Slash Commands]
     M2 --> M3[3. Multi-Agent Orchestration]
     M3 --> M4[4. Evaluation & Harness]
     M4 --> M5[5. Antigravity SDK]
     M5 --> M6[6. Ollama Orchestration]
+    style M0 fill:#ffd,stroke:#333,stroke-width:2px
     style M1 fill:#f9f,stroke:#333,stroke-width:2px
     style M2 fill:#bbf,stroke:#333,stroke-width:2px
     style M3 fill:#bfb,stroke:#333,stroke-width:2px
@@ -22,6 +24,10 @@ graph TD
     style M5 fill:#fdd,stroke:#333,stroke-width:2px
     style M6 fill:#dfd,stroke:#333,stroke-width:2px
 ```
+
+### [Module 0: AI IDE Architecture & Context Engineering](file:///c:/Coding/AI-Engineering/materials/00_context_engineering.md)
+*   **이론**: AI IDE의 3대 구동 객체(Host, Model, Execution Layer), 5대 컨텍스트 패키징 페이로드 구조 및 토큰 예산 관리 이해.
+*   **실습**: 사용자 질문과 터미널 실행 로그가 LLM 프롬프트 조립 보따리로 통합되는 매커니즘 직접 추적 및 디버깅.
 
 ### [Module 1: Model Context Protocol (MCP)](file:///c:/Coding/AI-Engineering/materials/01_mcp.md)
 *   **이론**: AI 모델이 외부 도구, 데이터베이스, API 등과 소통하는 오픈 표준 프로토콜(MCP)의 개념과 아키텍처(Host vs. Server) 이해.
@@ -55,6 +61,7 @@ graph TD
 c:\Coding\AI-Engineering\
 ├── curriculum.md                <-- 현재 문서 (Syllabus)
 ├── materials/                   <-- 상세 이론 학습 교재 폴더
+│   ├── 00_context_engineering.md<-- Module 0: AI IDE 아키텍처 및 컨텍스트 엔지니어링 교재
 │   ├── 01_mcp.md
 │   ├── 02_skills.md
 │   ├── 03_orchestration.md

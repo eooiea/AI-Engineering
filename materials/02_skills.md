@@ -56,6 +56,8 @@ Antigravity 시스템은 크게 **상시 전역 규칙(`AGENTS.md`)**과 **동�
 
 ## 🔄 Part 3: AGENTS.md vs SKILL.md 비교 & 메모리 전략
 
+AI IDE의 5대 컨텍스트 조립 파이프라인([00_context_engineering.md](file:///c:/Coding/AI-Engineering/materials/00_context_engineering.md))에서 `AGENTS.md`와 `SKILL.md`는 토큰 예산 관리의 중심 축입니다.
+
 | 구분 | **`AGENTS.md` (전역 규칙)** | **`SKILL.md` (커스텀 스킬)** |
 | :--- | :--- | :--- |
 | **주요 역할** | **모든 대화에 공통 적용되는 뼈대 수칙** | **특정 태스크 수행을 위한 전문 가이드라인** |
