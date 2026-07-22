@@ -35,8 +35,8 @@ graph TD
 ```
 
 ### [Module 0: AI IDE Architecture & Context Engineering](file:///c:/Coding/AI-Engineering/materials/00_context_engineering.md)
-*   **이론**: AI IDE의 3대 구동 객체(Host, Model, Execution Layer), 5대 컨텍스트 패키징 페이로드 구조 및 토큰 예산 관리 이해.
-*   **실습**: 사용자 질문과 터미널 실행 로그가 LLM 프롬프트 조립 보따리로 통합되는 매커니즘 직접 추적 및 디버깅.
+*   **이론**: AI IDE의 3대 구동 객체(Host, Model, Execution Layer), Context Window 한계(Lost in the Middle), 5대 컨텍스트 페이로드 및 `scripts/` 정적 파서의 토큰 다이어프트 원리 이해.
+*   **실습**: 5대 페이로드 조립 및 `scripts/` 헬퍼 스크립트를 통한 80% 토큰 절감 효과를 직접 측정하는 [context_engineering_example.py](file:///c:/Coding/AI-Engineering/examples/context_engineering_example.py) 구동.
 
 ### [Module 1: Model Context Protocol (MCP)](file:///c:/Coding/AI-Engineering/materials/01_mcp.md)
 *   **이론**: AI 모델이 외부 도구, 데이터베이스, API 등과 소통하는 오픈 표준 프로토콜(MCP)의 개념과 아키텍처(Host vs. Server) 이해.
@@ -98,6 +98,7 @@ c:\Coding\AI-Engineering\
 │   ├── 09_guardrails_security.md
 │   └── 10_observability_tracing.md
 ├── examples/                    <-- 직접 돌려보는 실습 파이썬 코드
+│   ├── context_engineering_example.py <-- Module 0: 토큰 다이어트 시뮬레이터
 │   ├── mcp_server.py
 │   ├── linkedin_mcp_example.py   <-- LinkedIn MCP 시뮬레이터
 │   ├── sdk_agent.py

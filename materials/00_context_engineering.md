@@ -1,6 +1,6 @@
 # 🧩 Module 0: AI IDE Architecture & Context Engineering
 
-Modern Agentic IDE(Antigravity, Cursor 등)가 사용자의 단순한 질문 하나를 받아 어떻게 백그라운드에서 전체 컨텍스트 보따리를 조립하고, 외부 도구와 연동하며, 토큰 예산(Token Budget)을 효율적으로 관리하는지 다루는 **기초 아키텍처 및 컨텍스트 엔지니어링 교재**입니다.
+Modern Agentic IDE(Antigravity, Cursor 등)가 사용자의 단순한 질문 하나를 받아 어떻게 백그라운드에서 전체 컨텍스트 보따리를 조립하고, 외부 도구와 연동하며, **컨텍스트 윈도우(Context Window)**와 토큰 예산(Token Budget)을 효율적으로 관리하는지 다루는 **기초 아키텍처 및 컨텍스트 엔지니어링 교재**입니다.
 
 ---
 
@@ -30,7 +30,21 @@ AI IDE는 단순히 "LLM API를 호출하는 챗봇"이 아니라, 다음 세 �
 
 ---
 
-## 📦 2. 컨텍스트 조립 파이프라인 (Context Packaging)
+## 🧠 2. 컨텍스트 윈도우(Context Window)의 한계와 현상학
+
+### 1) 컨텍스트 윈도우(Context Window)란?
+LLM이 한 번의 대화 추론에서 **동시에 읽고 기억할 수 있는 최대 토큰(Token) 한계 용량**입니다. (예: Gemini 2.5 Flash - 1M tokens, Claude 3.5 Sonnet - 200k tokens)
+
+### 2) 대용량 컨텍스트 윈도우의 3대 치명적 한계
+컨텍스트 윈도우가 크다고 해서 무작정 모든 소스 코드나 로그를 집어넣으면 다음과 같은 문제가 발생합니다:
+
+* **Lost in the Middle (중간 분실 현상)**: LLM의 Self-Attention 메커니즘 특성상 프롬프트의 맨 처음(Head)과 맨 끝(Tail)에 있는 정보는 잘 기억하지만, **중간에 위치한 대량의 코드는 무시하거나 놓치는 현상**이 발생합니다.
+* **Context Rotting (컨텍스트 오염)**: 불필요한 로그나 전체 코드가 주입되면 어텐션 분포가 분산되어 **환각(Hallucination) 발현율이 급증**합니다.
+* **비용 및 지연시간 폭증**: 토큰 수가 비례하여 증가할수록 API 호출 비용과 응답 대기 시간이 선형적으로 늘어납니다.
+
+---
+
+## 📦 3. 컨텍스트 조립 파이프라인 (Context Packaging)
 
 사용자가 대화창에 한 줄(예: *"깃에 push해줘"*)을 입력했을 때, Host(IDE)가 백그라운드에서 결합하는 **5대 컨텍스트 페이로드(Payload)** 구조입니다.
 
@@ -55,27 +69,47 @@ AI IDE는 단순히 "LLM API를 호출하는 챗봇"이 아니라, 다음 세 �
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 💡 왜 터미널 로그(4번)가 들어가야 할까요?
-LLM은 "현재 어떤 파일이 수정되었는지" 스스로 알 수 없습니다. Host가 `git status`를 대신 실행하고 그 **터미널 출력 로그(`modified: materials/01_mcp.md...`)를 컨텍스트 보따리에 넣어 전송**해주어야만, LLM이 이를 읽고 정확한 커밋 메시지 범위(`docs(Materials)`)를 판단할 수 있게 됩니다.
+---
+
+## 🛠️ 4. `scripts/` 헬퍼 스크립트의 역할 (결정론적 컨텍스트 최적화)
+
+컨텍스트 엔지니어링의 핵심 지혜는 **"LLM에게 모든 분석을 맡기지 않고, 결정론적(Deterministic) 파이썬 스크립트에게 전처리를 위임하는 것"**입니다.
+
+```text
+[나쁜 접근법 - 확률적 LLM에 전적으로 의존]
+ 수천 줄 전체 소스 코드 주입 ──► LLM 추론 파싱 ──► 토큰 폭증 & 환각 위험 (Lost in the Middle!)
+
+[우수한 컨텍스트 엔지니어링 - scripts/ 정적 헬퍼 결합]
+ 소스 코드 ──► scripts/check_style.py 실행 (0.01초 정적 파싱) ──► 요약 JSON 결과 ──► LLM 주입
+```
+
+### `scripts/` 헬퍼 스크립트 구축 3대 원칙
+1. **결정론적 계산 (Deterministic Calculation)**: Python `ast`, `flake8`, `pytest` 등 검증된 도구를 사용해 100% 정밀한 결과 산출.
+2. **토큰 다이어트 (High Signal-to-Noise Ratio)**: 2,000줄짜리 소스 코드 대신 **10줄짜리 핵심 검사 결과 JSON/Markdown 요약본만 컨텍스트 보따리에 주입**.
+3. **오류 차단**: LLM이 코드 줄 수를 잘못 카운트하거나 오타를 지적하는 추론 오차 차단.
 
 ---
 
-## ⚖️ 3. 컨텍스트 엔지니어링 & 토큰 예산 전략
-
-컨텍스트 엔지니어링의 핵심 목표는 **"최소한의 필요한 정보(High signal)로 토큰 낭비를 막고, 환각(Hallucination) 없이 100% 명확한 답변을 유도하는 것"**입니다.
+## ⚖️ 5. 컨텍스트 엔지니어링 & 토큰 예산 관리 전략
 
 ### ① Always-Loaded vs On-Demand 이원화 구조
 * **`AGENTS.md` (상시 주입)**: 365일 항상 뇌에 켜두어야 하는 **핵심 사규/코딩 수칙**. (상시 메모리 고정)
 * **`SKILL.md` (동적 주입)**: 평소에는 제목만 기억하다가 **해당 작업 요청이 들어온 순간에만 본문을 읽어오는 서류함 매뉴얼**. (토큰 90% 이상 절약)
 
-### ② 방어적 정적 스크립트 결합 (`scripts/`)
-수천 줄의 코드를 LLM의 눈(추론)으로 일일이 다 파싱하면 토큰이 낭비되고 환각이 생깁니다. 파이썬 `ast` 기반의 정적 검사 스크립트([check_style.py](file:///c:/Coding/AI-Engineering/.agents/skills/review-code/scripts/check_style.py))를 돌려 **0.1초 만에 요약된 JSON 결과만 컨텍스트에 넘겨주는 방식**이 가장 이상적인 컨텍스트 엔지니어링 기법입니다.
+### ② Sliding Window & Summarization (슬라이딩 윈도우)
+오래된 대화 이력이나 도구 실행 로그는 요약(Summarization)하거나 최근 N개 메세지만 유지하여 컨텍스트 오염을 방지합니다.
 
 ---
 
-## 🏋️ 실습: 컨텍스트 패키징 직접 디버깅해 보기
+## 🏋️ 실습 예제 따라하기
 
-1. 프로젝트 전역 규칙 파일인 [.agents/AGENTS.md](file:///c:/Coding/AI-Engineering/.agents/AGENTS.md)의 수칙 1(한글 답변)과 수칙 3(예외 처리)을 수정합니다.
-2. 커스텀 스킬 [.agents/skills/commit-msg/SKILL.md](file:///c:/Coding/AI-Engineering/.agents/skills/commit-msg/SKILL.md)의 `-m` 멀티라인 규격을 확인합니다.
-3. 에이전트 대화창에 *"로그인 기능 구현한 내용 커밋 메시지 짜줘"* 지시를 보냅니다.
-4. 에이전트가 `AGENTS.md`(전역 규칙), `commit-msg/SKILL.md`(스킬), 그리고 현재 워크스페이스 변경 상태를 조합하여 하나의 완벽한 커밋 명령을 조립해 내는 과정을 확인합니다.
+이 모듈과 연계되는 컨텍스트 엔지니어링 파이프라인 시뮬레이션 코드 파일은 [examples/context_engineering_example.py](file:///c:/Coding/AI-Engineering/examples/context_engineering_example.py)에 작성되어 있습니다.
+
+### 실습 실행 방법
+```bash
+python examples/context_engineering_example.py
+```
+
+### 코드 주요 포인트
+* 전역 규칙(`AGENTS.md`), 스킬(`SKILL.md`), 그리고 정적 헬퍼 스크립트(`scripts/check_style.py`) 결과가 하나의 토큰 효율적 페이로드로 조립되는 시퀀스 확인.
+* 전체 소스 코드를 보낼 때와 `scripts/` 요약본을 보낼 때의 **토큰 절감 비율(80% 이상 절감) 비교 검증**.
