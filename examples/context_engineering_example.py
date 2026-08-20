@@ -1,70 +1,103 @@
-"""Context Engineering & Token Budgeting Simulation Module.
+"""Module 0: AI IDE Architecture & Context Engineering Simulation.
 
-5대 컨텍스트 페이로드 조립, scripts/ 헬퍼 스크립트를 활용한 토큰 다이어트 및 컨텍스트 윈도우 최적화를 시연합니다.
+Prompt Caching(KV-Cache)과 Context Compaction(정적 스크립트 전처리 및 토큰 다이어트)
+효과를 정량적으로 시뮬레이션하고 측정하는 예제입니다.
 """
+
+import dataclasses
+import json
 import sys
-from pathlib import Path
 
-# check_style 스크립트 경로 연동
-sys.path.append(str(Path(__file__).parent.parent / ".agents" / "skills" / "review-code" / "scripts"))
-try:
-    from check_style import analyze_code_style
-    HAS_CHECK_STYLE = True
-except ImportError:
-    HAS_CHECK_STYLE = False
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 
-class ContextPackager:
-    """AI IDE 백그라운드 컨텍스트 페이로드 조립기."""
-    def __init__(self):
-        self.system_rules = "AGENTS.md: 모든 답변은 정중한 한글로 작성하고 PEP8 규격을 준수한다."
-        self.skill_instructions = "SKILL.md(review-code): 스코어 테이블 및 세부 피드백을 제공한다."
+@dataclasses.dataclass
+class TokenBudgetStats:
+    raw_tokens: int
+    optimized_tokens: int
+    cached_tokens: int
+    cost_raw_usd: float
+    cost_optimized_usd: float
+    latency_raw_ms: float
+    latency_optimized_ms: float
 
-    def build_naive_payload(self, raw_code: str, user_prompt: str) -> dict:
-        """[나쁜 예시] 수천 줄 전체 코드를 통째로 주입하는 방식."""
-        content = f"{self.system_rules}\n{self.skill_instructions}\n[전체 소스코드]\n{raw_code}\n[지시]\n{user_prompt}"
-        token_estimate = len(content) // 4  # 대략적인 토큰 수 추정
-        return {"type": "Naive (전체 코드 주입)", "content_length": len(content), "tokens": token_estimate}
 
-    def build_optimized_payload(self, raw_code: str, user_prompt: str) -> dict:
-        """[우수한 컨텍스트 엔지니어링] scripts/ 정적 파싱 결과 요약본만 주입하는 방식."""
-        if HAS_CHECK_STYLE:
-            script_result = analyze_code_style(raw_code)
-            summary_str = f"check_style.py 정적 분석 결과: {script_result}"
-        else:
-            summary_str = "check_style.py 요약: snake_case 위반 없음, docstring 누락 2건"
+class ContextOptimizer:
+    """정적 스크립트 전처리 및 Prompt Caching 시뮬레이터."""
 
-        content = f"{self.system_rules}\n{self.skill_instructions}\n[scripts/ 헬퍼 정적 파싱 요약]\n{summary_str}\n[지시]\n{user_prompt}"
-        token_estimate = len(content) // 4
-        return {"type": "Optimized (scripts/ 요약 주입)", "content_length": len(content), "tokens": token_estimate}
+    def __init__(self, price_per_1k_input: float = 0.0015, price_per_1k_cached: float = 0.0003):
+        self.price_input = price_per_1k_input
+        self.price_cached = price_per_1k_cached
+
+    def simulate_pipeline(self, raw_codebase: str, user_query: str) -> TokenBudgetStats:
+        raw_tokens = len(raw_codebase.split()) * 2
+        raw_tokens += len(user_query.split()) * 2
+        cost_raw = (raw_tokens / 1000) * self.price_input
+        latency_raw = raw_tokens * 0.15
+
+        static_system_tokens = 400
+        cached_tokens = static_system_tokens
+
+        condensed_summary = {
+            "file": "main.py",
+            "total_lines": 1500,
+            "detected_issues": [
+                {"line": 42, "type": "SyntaxWarning", "msg": "undefined variable 'target'"},
+                {"line": 108, "type": "SecurityRisk", "msg": "hardcoded password detected"}
+            ]
+        }
+        summary_tokens = len(json.dumps(condensed_summary).split()) * 2
+        dynamic_tokens = summary_tokens + (len(user_query.split()) * 2)
+
+        optimized_tokens = static_system_tokens + dynamic_tokens
+        cost_optimized = ((cached_tokens / 1000) * self.price_cached) + ((dynamic_tokens / 1000) * self.price_input)
+        latency_optimized = (cached_tokens * 0.01) + (dynamic_tokens * 0.15)
+
+        return TokenBudgetStats(
+            raw_tokens=raw_tokens,
+            optimized_tokens=optimized_tokens,
+            cached_tokens=cached_tokens,
+            cost_raw_usd=cost_raw,
+            cost_optimized_usd=cost_optimized,
+            latency_raw_ms=latency_raw,
+            latency_optimized_ms=latency_optimized
+        )
+
+
+def main():
+    print("=" * 70)
+    print("🧩 Module 0: Context Engineering & Prompt Caching Simulator")
+    print("=" * 70)
+
+    mock_large_codebase = "\n".join([f"def function_{i}(): return 'result_{i}'" for i in range(500)])
+    user_query = "main.py에서 보안 결함 및 구문 오류가 발생하는 줄을 찾아 수정해줘."
+
+    optimizer = ContextOptimizer()
+    stats = optimizer.simulate_pipeline(mock_large_codebase, user_query)
+
+    print("\n[📊 1. 토큰 사용량 비교]")
+    print(f"  • 원본 전체 코드 주입 시:  {stats.raw_tokens:>6,} Tokens")
+    print(f"  • 정적 압축 및 캐싱 적용 시: {stats.optimized_tokens:>6,} Tokens (캐시 히트: {stats.cached_tokens:,} tok)")
+    reduction_pct = (1 - (stats.optimized_tokens / stats.raw_tokens)) * 100
+    print(f"  🔥 토큰 절감율: {reduction_pct:.1f}% 절약 달성!")
+
+    print("\n[💰 2. 1회 API 호출 비용 비교 (1M 쿼리 기준 추정)]")
+    print(f"  • 원본 주입 1회 비용:      ${stats.cost_raw_usd:.5f} (100만 회: ${stats.cost_raw_usd * 1_000_000:,.2f})")
+    print(f"  • 최적화 주입 1회 비용:    ${stats.cost_optimized_usd:.5f} (100만 회: ${stats.cost_optimized_usd * 1_000_000:,.2f})")
+
+    print("\n[⚡ 3. 응답 대기 지연시간(Latency) 비교]")
+    print(f"  • 원본 주입 예상 지연시간:  {stats.latency_raw_ms:>6.1f} ms")
+    print(f"  • 최적화 주입 예상 지연시간: {stats.latency_optimized_ms:>6.1f} ms (KV-Cache 고속 로드)")
+
+    print("\n" + "=" * 70)
+    print("✅ 결론: 결정론적 scripts/ 전처리와 Prompt Caching 배치가 결합될 때")
+    print("   비용 80%+ 절감, 지연시간 단축, Lost-in-the-Middle 문제 원천 차단.")
+    print("=" * 70)
 
 
 if __name__ == "__main__":
-    print("[Start] Module 0: Context Engineering & Token Budgeting 실습\n")
-    
-    # 500줄 분량의 샘플 대형 파이썬 소스 코드 가정
-    sample_code = """
-def badFunctionName(x, y):
-    return x + y
-
-class sampleClass:
-    def processData(self, data):
-        pass
-""" * 50  # 50번 반복하여 250줄 이상의 코드 생성
-
-    packager = ContextPackager()
-    user_query = "이 코드 스타일 검사하고 리뷰 보고서 작성해 줘"
-
-    naive_res = packager.build_naive_payload(sample_code, user_query)
-    opt_res = packager.build_optimized_payload(sample_code, user_query)
-
-    print("=" * 40 + " 컨텍스트 페이로드 비교 " + "=" * 40)
-    print(f"1) {naive_res['type']}:")
-    print(f"   - 글자 수: {naive_res['content_length']}자 | 추정 토큰: {naive_res['tokens']} tokens")
-    print(f"\n2) {opt_res['type']}:")
-    print(f"   - 글자 수: {opt_res['content_length']}자 | 추정 토큰: {opt_res['tokens']} tokens")
-    
-    saved_percent = (1 - opt_res['tokens'] / naive_res['tokens']) * 100
-    print("-" * 96)
-    print(f"[Result] scripts/ 헬퍼 스크립트 활용으로 [ {saved_percent:.1f}% ] 의 토큰 절감 및 컨텍스트 윈도우 최적화 달성!")
-    print("=" * 96)
+    main()

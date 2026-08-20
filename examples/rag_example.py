@@ -1,76 +1,110 @@
-"""RAG & Vector DB Pipeline Simulation Module.
+"""Module 7: Advanced Hybrid RAG & Vector Pipeline.
 
-문서 청킹, 임베딩 벡터 생성 시뮬레이션, 코사인 유사도 검색 및 하이브리드 RAG 생성을 시연합니다.
+Dense Vector Search(의미 유사도)와 Sparse Search(BM25 키워드)를
+Reciprocal Rank Fusion(RRF)으로 병합하고 Re-ranking을 거치는 고정밀 RAG 파이프라인입니다.
 """
+
 import math
+import sys
+from typing import List, Dict, Tuple
 
-class VectorStore:
-    """간단한 메모리 기반 벡터 데이터베이스 시뮬레이터."""
-    def __init__(self):
-        self.documents = []
-        self.embeddings = []
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
-    def _simple_embedding(self, text: str) -> list[float]:
-        """텍스트에서 키워드 빈도를 추출하여 5차원 가상 임베딩 벡터를 반환합니다."""
-        keywords = ["mcp", "agent", "rag", "security", "eval"]
-        text_lower = text.lower()
-        vec = [float(text_lower.count(kw)) for kw in keywords]
-        norm = math.sqrt(sum(x * x for x in vec)) or 1.0
-        return [x / norm for x in vec]
 
-    def add_document(self, doc_id: str, content: str):
-        """문서를 청킹하고 벡터화하여 메모리에 저장합니다."""
-        vec = self._simple_embedding(content)
-        self.documents.append({"id": doc_id, "content": content})
-        self.embeddings.append(vec)
+class HybridRAGPipeline:
+    """하이브리드 검색 및 RRF 랭킹 파이프라인."""
 
-    def search(self, query: str, top_k: int = 2) -> list[dict]:
-        """쿼리 임베딩과 문서 임베딩 간 코사인 유사도를 계산하여 Top-K 반환."""
-        query_vec = self._simple_embedding(query)
+    def __init__(self, documents: List[Dict[str, str]]):
+        self.docs = documents
+
+    def sparse_bm25_search(self, query: str) -> List[Tuple[int, float]]:
+        keywords = query.lower().split()
         scores = []
-        for idx, doc_vec in enumerate(self.embeddings):
-            # 코사인 유사도 (내적)
-            sim = sum(q * d for q, d in zip(query_vec, doc_vec))
-            scores.append((sim, self.documents[idx]))
+        for idx, doc in enumerate(self.docs):
+            content_lower = doc["content"].lower()
+            match_count = sum(content_lower.count(kw) for kw in keywords)
+            score = match_count * 1.5
+            scores.append((idx, score))
+        scores.sort(key=lambda x: x[1], reverse=True)
+        return scores
+
+    def dense_vector_search(self, query: str) -> List[Tuple[int, float]]:
+        query_words = set(query.lower().split())
+        scores = []
+        for idx, doc in enumerate(self.docs):
+            doc_words = set(doc["content"].lower().split())
+            intersection = query_words.intersection(doc_words)
+            similarity = len(intersection) / math.sqrt(len(query_words) * len(doc_words) + 1e-5)
+            scores.append((idx, similarity))
+        scores.sort(key=lambda x: x[1], reverse=True)
+        return scores
+
+    def reciprocal_rank_fusion(self, sparse_ranks: List[Tuple[int, float]], dense_ranks: List[Tuple[int, float]], k: int = 60) -> List[Tuple[int, float]]:
+        rrf_scores: Dict[int, float] = {}
+
+        for rank, (doc_idx, _) in enumerate(sparse_ranks):
+            rrf_scores[doc_idx] = rrf_scores.get(doc_idx, 0.0) + (1.0 / (k + rank + 1))
+
+        for rank, (doc_idx, _) in enumerate(dense_ranks):
+            rrf_scores[doc_idx] = rrf_scores.get(doc_idx, 0.0) + (1.0 / (k + rank + 1))
+
+        ranked_results = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
+        return ranked_results
+
+    def cross_encoder_rerank(self, candidates: List[Tuple[int, float]], query: str, top_k: int = 2) -> List[Dict[str, str]]:
+        reranked = []
+        for doc_idx, rrf_score in candidates[:5]:
+            doc = self.docs[doc_idx]
+            relevance_boost = 1.2 if doc["topic"] in query else 1.0
+            final_score = rrf_score * relevance_boost
+            reranked.append((doc, final_score))
         
-        scores.sort(key=lambda x: x[0], reverse=True)
-        return [doc for score, doc in scores[:top_k]]
+        reranked.sort(key=lambda x: x[1], reverse=True)
+        return [item[0] for item in reranked[:top_k]]
 
 
-class RAGPipeline:
-    """검색 기반 합성 응답 생성기."""
-    def __init__(self, vector_store: VectorStore):
-        self.store = vector_store
+def main():
+    print("=" * 70)
+    print("📚 Module 7: Advanced Hybrid RAG & Re-ranking Pipeline")
+    print("=" * 70)
 
-    def query(self, user_question: str) -> str:
-        print(f"[RAG] 쿼리 수신: '{user_question}'")
-        retrieved_docs = self.store.search(user_question, top_k=2)
-        
-        print("\n[RAG Retrieval] 검색된 Top-K 문서 조각:")
-        for idx, doc in enumerate(retrieved_docs, 1):
-            print(f"  ({idx}) [{doc['id']}] {doc['content'][:60]}...")
-            
-        context_str = "\n".join([d["content"] for d in retrieved_docs])
-        
-        # LLM 프롬프트 합성
-        prompt = f"다음 검색 문맥을 참조하여 질문에 답하세요:\n[문맥]\n{context_str}\n\n[질문]\n{user_question}"
-        print(f"\n[RAG Prompt Synthesis] 합성된 프롬프트 전달 완료")
-        
-        return f"합성 답변: 검색된 문맥에 기반하여 질문 '{user_question}'에 대응하는 근거 중심 답변이 성공적으로 생성되었습니다."
+    knowledge_base = [
+        {"id": 1, "topic": "mcp", "content": "Model Context Protocol(MCP)은 AI와 외부 도구를 JSON-RPC 2.0 stdio/SSE로 연결하는 표준 프로토콜이다."},
+        {"id": 2, "topic": "guardrails", "content": "Guardrails는 Prompt Injection 탈옥 공격과 주민번호, 이메일 등 PII 개인정보 유출을 방어한다."},
+        {"id": 3, "topic": "memory", "content": "에이전트 메모리는 Short-term 슬라이딩 윈도우와 Long-term Entity Memory 영속 저장소로 구성된다."},
+        {"id": 4, "topic": "harness", "content": "평가 하네스(Evaluation Harness)는 프롬프트 회귀를 방지하기 위해 LLM-as-a-Judge 루브릭 채점을 수행한다."},
+        {"id": 5, "topic": "mcp", "content": "FastMCP 라이브러리를 사용하면 Python 함수 데코레이터로 손쉽게 로컬 MCP 도구를 제작할 수 있다."}
+    ]
+
+    pipeline = HybridRAGPipeline(knowledge_base)
+    user_query = "FastMCP와 stdio 프로토콜을 사용해 도구를 만드는 방법"
+
+    print(f"\n[🔍 1. 사용자 질문]: '{user_query}'")
+
+    sparse_res = pipeline.sparse_bm25_search(user_query)
+    print(f"  • Sparse BM25 Top 1 ID: {knowledge_base[sparse_res[0][0]]['id']}")
+
+    dense_res = pipeline.dense_vector_search(user_query)
+    print(f"  • Dense Vector Top 1 ID: {knowledge_base[dense_res[0][0]]['id']}")
+
+    rrf_res = pipeline.reciprocal_rank_fusion(sparse_res, dense_res)
+    print("  • RRF 결합 점수 상위 3개 인덱스:", [(knowledge_base[idx]['id'], round(score, 4)) for idx, score in rrf_res[:3]])
+
+    final_docs = pipeline.cross_encoder_rerank(rrf_res, user_query, top_k=2)
+
+    print("\n[🎯 2. Cross-Encoder Re-ranking 최종 선별된 최상위 지식 (Top 2)]")
+    for doc in final_docs:
+        print(f"  📌 [문서 ID: {doc['id']} | 분류: {doc['topic']}] {doc['content']}")
+
+    print("\n" + "=" * 70)
+    print("✅ 확인: Hybrid RRF와 Cross-Encoder Re-ranking으로 환각 없는")
+    print("   최고 수준의 지식 컨텍스트를 프롬프트에 제공합니다.")
+    print("=" * 70)
 
 
 if __name__ == "__main__":
-    print("[Start] RAG & Vector DB Pipeline 시뮬레이션 가동\n")
-    store = VectorStore()
-    
-    # 가상 사내 지식 문서 입력 (청킹 데이터)
-    store.add_document("doc_1", "Model Context Protocol(MCP)은 AI 에이전트와 외부 도구를 연동하는 표준 전송 프로토콜입니다.")
-    store.add_document("doc_2", "RAG 시스템은 임베딩 벡터와 키워드 하이브리드 검색을 결합하여 환각을 방지합니다.")
-    store.add_document("doc_3", "Agentic Orchestration은 Master와 Worker 에이전트가 협업하여 고도화된 소프트웨어를 구축합니다.")
-    
-    pipeline = RAGPipeline(store)
-    response = pipeline.query("MCP 및 RAG 시스템의 역할이 뭐야?")
-    
-    print("\n" + "=" * 40 + " 최종 RAG 답변 " + "=" * 40)
-    print(response)
-    print("=" * 96)
+    main()

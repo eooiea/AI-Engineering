@@ -1,112 +1,116 @@
-"""Assertion-based Prompt Evaluation Harness Module.
+"""Module 8: Evaluation Harness & LLM-as-a-Judge Example.
 
-LLM 생성 응답 품질을 단언문(Assertion) 규칙 기반으로 정량 평가하는 테스트 러너 예제입니다.
+결정론적 어설션(JSON 구문 검증, Regex)과
+LLM-as-a-Judge 정량 루브릭(Rubric 1~5점 척도)을 통합하여
+프롬프트 회귀(Regression)를 테스트하는 자동화 하네스입니다.
 """
+
+import dataclasses
 import json
-import re
+import sys
+from typing import List
 
-class AssertionTestRunner:
-    """간단한 규칙 및 어설션(Assertion) 기반 평가 하네스 테스트 러너"""
-    def __init__(self):
-        self.tests_run = 0
-        self.tests_passed = 0
-        self.tests_failed = 0
-        self.results = []
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
-    def log_result(self, name: str, success: bool, message: str):
-        self.tests_run += 1
-        if success:
-            self.tests_passed += 1
-            status = "PASS"
-        else:
-            self.tests_failed += 1
-            status = "FAIL"
-            
-        print(f"[{status}] {name} - {message}")
-        self.results.append({"name": name, "status": status, "message": message})
 
-    # --- 기본 단언문 (Assertions) ---
-    
-    def assert_contains(self, test_name: str, text: str, substring: str):
-        """특정 서브스트링이 결과물에 포함되어 있는지 검증"""
-        success = substring in text
-        msg = f"키워드 '{substring}' 포함 여부 검사"
-        self.log_result(test_name, success, msg if success else f"{msg} 실패 (텍스트: '{text[:30]}...')")
+@dataclasses.dataclass
+class TestCase:
+    id: str
+    prompt: str
+    ground_truth: str
+    generated_output: str
 
-    def assert_json(self, test_name: str, text: str):
-        """결과물이 올바른 JSON 포맷인지 검증"""
+
+@dataclasses.dataclass
+class EvalReport:
+    test_id: str
+    deterministic_pass: bool
+    judge_score: int
+    rubric_feedback: str
+
+
+class LLMAsAJudgeHarness:
+    """하이브리드 평가 하네스 러너."""
+
+    def evaluate_deterministic(self, output: str) -> bool:
         try:
-            json.loads(text)
-            success = True
-            msg = "올바른 JSON 구문 구조 검증"
-        except json.JSONDecodeError as e:
-            success = False
-            msg = f"JSON 파싱 실패 ({e})"
-        self.log_result(test_name, success, msg)
+            parsed = json.loads(output)
+            return isinstance(parsed, dict) and "status" in parsed
+        except Exception:
+            return False
 
-    def assert_length_range(self, test_name: str, text: str, min_len: int, max_len: int):
-        """텍스트 길이가 지정된 바운더리 내에 속하는지 검증"""
-        length = len(text)
-        success = min_len <= length <= max_len
-        msg = f"텍스트 길이 ({length}자) -> 범위 ({min_len} ~ {max_len}자) 만족 여부"
-        self.log_result(test_name, success, msg if success else f"{msg} 실패")
+    def evaluate_judge_rubric(self, prompt: str, ground_truth: str, generated: str) -> (int, str):
+        if "hallucination_detected" in generated:
+            return 1, "❌ [1점] 근거 없는 허위 사실이 포함되어 있어 탈락."
+        elif "incomplete" in generated:
+            return 3, "⚠️ [3점] 대체로 부합하나 필수 세부 항목 일부 누락."
+        else:
+            return 5, "✅ [5점] Ground Truth에 완벽히 부합하며 군더더기 없는 최상위 품질."
 
-    def assert_regex(self, test_name: str, text: str, pattern: str):
-        """정규표현식 매칭 검증"""
-        success = bool(re.search(pattern, text))
-        msg = f"정규식 패턴 '{pattern}' 매칭 여부"
-        self.log_result(test_name, success, msg if success else f"{msg} 실패")
-
-    def print_summary(self):
-        """최종 평가 결과 요약 레포트 출력"""
-        print("\n" + "=" * 40 + " 평가 요약 보고서 " + "=" * 40)
-        print(f"총 테스트 수: {self.tests_run} | 성공: {self.tests_passed} | 실패: {self.tests_failed}")
-        success_rate = (self.tests_passed / self.tests_run * 100) if self.tests_run > 0 else 0
-        print(f"합격률 (Success Rate): {success_rate:.1f}%")
-        print("=" * 96)
+    def run_suite(self, test_cases: List[TestCase]) -> List[EvalReport]:
+        reports = []
+        for tc in test_cases:
+            det_pass = self.evaluate_deterministic(tc.generated_output)
+            score, feedback = self.evaluate_judge_rubric(tc.prompt, tc.ground_truth, tc.generated_output)
+            reports.append(EvalReport(tc.id, det_pass, score, feedback))
+        return reports
 
 
-# --- 테스트 케이스 데이터셋 시뮬레이션 ---
-# 실제 환경에서는 LLM API 호출 후 리턴된 response.text 값을 아래 output에 매핑합니다.
+def main():
+    print("=" * 70)
+    print("🧪 Module 8: Evaluation Harness & LLM-as-a-Judge Suite")
+    print("=" * 70)
 
-MOCK_LLM_OUTPUTS = {
-    "case_1_json_formatter": {
-        "description": "사용자 정보를 JSON 구조로 정리하라는 프롬프트의 결과물",
-        "output": '{"name": "홍길동", "age": 30, "skills": ["Python", "AI Engineering"]}'
-    },
-    "case_2_short_summary": {
-        "description": "본문을 50자 이내로 요약하고 핵심어 '에이전트'를 포함하라는 프롬프트의 결과물",
-        "output": "에이전트 오케스트레이션은 멀티 에이전트들의 협업과 상태 전이를 관리하는 최근 핵심 기법입니다." # 53자 (요약 조건 오버)
-    },
-    "case_3_email_extractor": {
-        "description": "텍스트에서 이메일 주소를 포맷에 맞춰 추출하라는 프롬프트의 결과물",
-        "output": "추출된 이메일: support@antigravity.google"
-    }
-}
+    test_cases = [
+        TestCase(
+            id="TC-001-HEALTHY",
+            prompt="시스템 상태를 JSON으로 보고해줘.",
+            ground_truth="status: ok",
+            generated_output=json.dumps({"status": "ok", "uptime_hours": 120, "healthy": True})
+        ),
+        TestCase(
+            id="TC-002-SYNTAX-FAIL",
+            prompt="에러 로그를 분석해줘.",
+            ground_truth="status: error",
+            generated_output="Sure! Here is your output: {status: invalid_json}"
+        ),
+        TestCase(
+            id="TC-003-HALLUCINATION",
+            prompt="MCP 프로토콜 작성자를 알려줘.",
+            ground_truth="Anthropic",
+            generated_output=json.dumps({"status": "ok", "note": "hallucination_detected: 작성자는 가상의 인물"})
+        )
+    ]
+
+    harness = LLMAsAJudgeHarness()
+    reports = harness.run_suite(test_cases)
+
+    print("\n[📊 테스트 결과 리포트]")
+    passed_count = 0
+    total_score = 0
+
+    for rep in reports:
+        print(f"\n▶ 테스트 ID: {rep.test_id}")
+        print(f"  • 결정론적 규칙 검증: {'PASS ✅' if rep.deterministic_pass else 'FAIL ❌'}")
+        print(f"  • LLM Judge 점수:     {rep.judge_score} / 5 점")
+        print(f"  • Judge 피드백:       {rep.rubric_feedback}")
+
+        if rep.deterministic_pass and rep.judge_score >= 4:
+            passed_count += 1
+        total_score += rep.judge_score
+
+    pass_rate = (passed_count / len(test_cases)) * 100
+    avg_score = total_score / len(test_cases)
+
+    print("\n" + "=" * 70)
+    print(f"📈 최종 요약: 총 {len(test_cases)}개 중 {passed_count}개 통과 (Pass Rate: {pass_rate:.1f}%)")
+    print(f"⭐ 전체 평균 Judge 점수: {avg_score:.2f} / 5.0 점")
+    print("=" * 70)
+
 
 if __name__ == "__main__":
-    runner = AssertionTestRunner()
-    
-    print("[Start] 평가 하네스 테스터 가동 (Assertion-based Testing Running...)\n")
-    
-    # Test 1: JSON 포맷 및 데이터 속성 검증
-    print("--- Test Suite 1: JSON Formatter Output ---")
-    data_1 = MOCK_LLM_OUTPUTS["case_1_json_formatter"]["output"]
-    runner.assert_json("TS1_JSON_Syntax", data_1)
-    runner.assert_contains("TS1_Contains_Name", data_1, '"name"')
-    runner.assert_contains("TS1_Contains_Skills", data_1, '"skills"')
-    
-    # Test 2: 분량 한계 및 핵심 키워드 유무 검증
-    print("\n--- Test Suite 2: Short Summary Restrictions ---")
-    data_2 = MOCK_LLM_OUTPUTS["case_2_short_summary"]["output"]
-    runner.assert_contains("TS2_Contains_Keyword", data_2, "에이전트")
-    # 50자 이내 제한 조건 검증 (실패 유도 시뮬레이션)
-    runner.assert_length_range("TS2_Length_Boundary", data_2, min_len=5, max_len=50)
-    
-    # Test 3: 정규식을 통한 이메일 주소 검출 검증
-    print("\n--- Test Suite 3: Data Extraction Regex ---")
-    data_3 = MOCK_LLM_OUTPUTS["case_3_email_extractor"]["output"]
-    runner.assert_regex("TS3_Email_Regex_Match", data_3, r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
-
-    # 최종 보고서 요약
-    runner.print_summary()
+    main()

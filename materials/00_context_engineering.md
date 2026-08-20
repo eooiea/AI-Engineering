@@ -1,16 +1,16 @@
 # 🧩 Module 0: AI IDE Architecture & Context Engineering
 
-Modern Agentic IDE(Antigravity, Cursor 등)가 사용자의 단순한 질문 하나를 받아 어떻게 백그라운드에서 전체 컨텍스트 보따리를 조립하고, 외부 도구와 연동하며, **컨텍스트 윈도우(Context Window)**와 토큰 예산(Token Budget)을 효율적으로 관리하는지 다루는 **기초 아키텍처 및 컨텍스트 엔지니어링 교재**입니다.
+Modern Agentic IDE(Antigravity, Cursor 등)가 사용자의 단순한 질문 하나를 받아 어떻게 백그라운드에서 전체 컨텍스트 보따리를 조립하고, 외부 도구와 연동하며, **컨텍스트 윈도우(Context Window)**, **Prompt Caching(KV-Cache)**, 그리고 **Context Compaction**을 최적화하는지 다루는 **기초 아키텍처 및 컨텍스트 엔지니어링 교재**입니다.
 
 ---
 
 ## 🏛️ 1. AI IDE 3대 내부 구성 요소와 역할 분담
 
-AI IDE는 단순히 "LLM API를 호출하는 챗봇"이 아니라, 다음 세 가지 핵심 객체가 긴밀하게 협력하는 **복합 소프트웨어 아키텍처**입니다.
+AI IDE는 단순한 챗봇이 아니라, 다음 세 가지 핵심 객체가 긴밀하게 협력하는 **복합 소프트웨어 아키텍처**입니다.
 
 ```text
 ┌─────────────────────────┐
-│       Gemini LLM        │ ◄── 🧠 1. 추론 엔진 (100% 텍스트 입출력만 담당)
+│       Gemini LLM        │ ◄── 🧠 1. 추론 엔진 (100% 텍스트/JSON 입출력만 담당)
 └────────────┬────────────┘
              │ (JSON-RPC / REST API)
              ▼
@@ -30,17 +30,17 @@ AI IDE는 단순히 "LLM API를 호출하는 챗봇"이 아니라, 다음 세 �
 
 ---
 
-## 🧠 2. 컨텍스트 윈도우(Context Window)의 한계와 현상학
+## 🧠 2. 컨텍스트 윈도우의 한계와 Prompt Caching
 
-### 1) 컨텍스트 윈도우(Context Window)란?
-LLM이 한 번의 대화 추론에서 **동시에 읽고 기억할 수 있는 최대 토큰(Token) 한계 용량**입니다. (예: Gemini 2.5 Flash - 1M tokens, Claude 3.5 Sonnet - 200k tokens)
-
-### 2) 대용량 컨텍스트 윈도우의 3대 치명적 한계
-컨텍스트 윈도우가 크다고 해서 무작정 모든 소스 코드나 로그를 집어넣으면 다음과 같은 문제가 발생합니다:
-
+### 1) 대용량 컨텍스트 윈도우의 3대 치명적 한계
 * **Lost in the Middle (중간 분실 현상)**: LLM의 Self-Attention 메커니즘 특성상 프롬프트의 맨 처음(Head)과 맨 끝(Tail)에 있는 정보는 잘 기억하지만, **중간에 위치한 대량의 코드는 무시하거나 놓치는 현상**이 발생합니다.
 * **Context Rotting (컨텍스트 오염)**: 불필요한 로그나 전체 코드가 주입되면 어텐션 분포가 분산되어 **환각(Hallucination) 발현율이 급증**합니다.
-* **비용 및 지연시간 폭증**: 토큰 수가 비례하여 증가할수록 API 호출 비용과 응답 대기 시간이 선형적으로 늘어납니다.
+* **비용 및 지연시간 폭증**: 토큰 수가 비례하여 증가할수록 API 호출 비용과 First-token Latency가 선형적으로 늘어납니다.
+
+### 2) Prompt Caching (KV-Cache 최적화 원리)
+최신 LLM Provider(Anthropic, Google Gemini, OpenAI)는 **프롬프트의 접두사(Prefix)가 일치할 경우 Key-Value Attention Tensor를 캐싱하여 재사용**합니다.
+* **정적 컨텍스트(Static Context)**: `AGENTS.md`(시스템 규칙), API 스키마, 도구 정의 등 변경되지 않는 부분을 **프롬프트의 최상단(Prefix)**에 배치하여 90% 이상의 캐시 히트율(Cache Hit)을 달성하고 비용을 50~80% 절감합니다.
+* **동적 컨텍스트(Dynamic Context)**: 사용자 입력, 직전 턴 실행 로그 등 매번 바뀌는 요소는 **프롬프트의 최하단**에 배치합니다.
 
 ---
 
@@ -52,16 +52,16 @@ LLM이 한 번의 대화 추론에서 **동시에 읽고 기억할 수 있는 �
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                         LLM 전송 컨텍스트 페이로드                        │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ 1️⃣ System Rules (상시 주입 규칙)                                          │
+│ 1️⃣ System Rules [Cacheable]                                              │
 │    - AGENTS.md 내의 전역 개발 수칙 (한글 답변, PEP 8, 예외 처리 규칙 등)   │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ 2️⃣ Triggered Custom Skills (동적 스킬 본문)                              │
+│ 2️⃣ Triggered Custom Skills [Cacheable]                                   │
 │    - 사용자 지시어("push")로 자동 감지된 commit-msg/SKILL.md 가이드라인    │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ 3️⃣ Workspace State & Active Context (현재 환경 상태)                     │
-│    - 현재 열려 있는 활성 파일 내용, 커서 위치, 디렉토리 나무 구조       │
+│ 3️⃣ Workspace State & Active Context                                      │
+│    - 현재 열려 있는 활성 파일 내용, 커서 위치, 디렉토리 구조             │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ 4️⃣ Tool & Terminal Execution Logs (실행 로그 데이터)                     │
+│ 4️⃣ Tool & Terminal Execution Logs                                        │
 │    - 방금 실행한 `git status`, `git add .` 등의 터미널 실제 Output 로그  │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ 5️⃣ User Instruction (사용자 질문)                                         │
@@ -71,45 +71,29 @@ LLM이 한 번의 대화 추론에서 **동시에 읽고 기억할 수 있는 �
 
 ---
 
-## 🛠️ 4. `scripts/` 헬퍼 스크립트의 역할 (결정론적 컨텍스트 최적화)
+## 🛠️ 4. `scripts/` 헬퍼 스크립트와 Context Compaction
 
-컨텍스트 엔지니어링의 핵심 지혜는 **"LLM에게 모든 분석을 맡기지 않고, 결정론적(Deterministic) 파이썬 스크립트에게 전처리를 위임하는 것"**입니다.
+컨텍스트 엔지니어링의 핵심 지혜는 **"LLM에게 원본 빅데이터 전체를 읽게 하지 않고, 결정론적(Deterministic) 파이썬 스크립트에게 전처리를 위임하는 것"**입니다.
 
+### 1) 결정론적 전처리 (Deterministic Preprocessing)
 ```text
 [나쁜 접근법 - 확률적 LLM에 전적으로 의존]
- 수천 줄 전체 소스 코드 주입 ──► LLM 추론 파싱 ──► 토큰 폭증 & 환각 위험 (Lost in the Middle!)
+ 소스 코드 2,000줄 주입 ──► LLM 추론 파싱 ──► 토큰 폭증 & 환각 위험 (Lost in the Middle!)
 
 [우수한 컨텍스트 엔지니어링 - scripts/ 정적 헬퍼 결합]
- 소스 코드 ──► scripts/check_style.py 실행 (0.01초 정적 파싱) ──► 요약 JSON 결과 ──► LLM 주입
+ 소스 코드 ──► scripts/check_style.py 실행 (0.01초 정적 파싱) ──► 10줄 요약 JSON ──► LLM 주입
 ```
 
-### `scripts/` 헬퍼 스크립트 구축 3대 원칙
-1. **결정론적 계산 (Deterministic Calculation)**: Python `ast`, `flake8`, `pytest` 등 검증된 도구를 사용해 100% 정밀한 결과 산출.
-2. **토큰 다이어트 (High Signal-to-Noise Ratio)**: 2,000줄짜리 소스 코드 대신 **10줄짜리 핵심 검사 결과 JSON/Markdown 요약본만 컨텍스트 보따리에 주입**.
-3. **오류 차단**: LLM이 코드 줄 수를 잘못 카운트하거나 오타를 지적하는 추론 오차 차단.
-
----
-
-## ⚖️ 5. 컨텍스트 엔지니어링 & 토큰 예산 관리 전략
-
-### ① Always-Loaded vs On-Demand 이원화 구조
-* **`AGENTS.md` (상시 주입)**: 365일 항상 뇌에 켜두어야 하는 **핵심 사규/코딩 수칙**. (상시 메모리 고정)
-* **`SKILL.md` (동적 주입)**: 평소에는 제목만 기억하다가 **해당 작업 요청이 들어온 순간에만 본문을 읽어오는 서류함 매뉴얼**. (토큰 90% 이상 절약)
-
-### ② Sliding Window & Summarization (슬라이딩 윈도우)
-오래된 대화 이력이나 도구 실행 로그는 요약(Summarization)하거나 최근 N개 메세지만 유지하여 컨텍스트 오염을 방지합니다.
+### 2) Context Compaction (컨텍스트 압축 전략)
+* **대화 히스토리 슬라이딩 윈도우**: 최근 N턴은 원문 유지, 오래된 대화는 중간 요약본(Summary Node)으로 치환.
+* **도구 실행 로그 Truncation**: 수백 줄의 빌드/테스트 로그 중 에러 스택트레이스(Error Trace) 핵심 30줄만 추출하여 주입.
 
 ---
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 컨텍스트 엔지니어링 파이프라인 시뮬레이션 코드 파일은 [examples/context_engineering_example.py](file:///c:/Coding/AI-Engineering/examples/context_engineering_example.py)에 작성되어 있습니다.
+이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/context_engineering_example.py](file:///c:/Coding/AI-Engineering/examples/context_engineering_example.py)에 작성되어 있습니다.
 
-### 실습 실행 방법
 ```bash
 python examples/context_engineering_example.py
 ```
-
-### 코드 주요 포인트
-* 전역 규칙(`AGENTS.md`), 스킬(`SKILL.md`), 그리고 정적 헬퍼 스크립트(`scripts/check_style.py`) 결과가 하나의 토큰 효율적 페이로드로 조립되는 시퀀스 확인.
-* 전체 소스 코드를 보낼 때와 `scripts/` 요약본을 보낼 때의 **토큰 절감 비율(80% 이상 절감) 비교 검증**.

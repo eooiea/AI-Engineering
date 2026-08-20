@@ -1,162 +1,110 @@
-"""Multi-Agent Master-Worker Orchestration Module.
+"""Module 6: Multi-Agent Orchestration & StateGraph.
 
-Gemini API 또는 Mock 에이전트를 조율하여 보고서 아웃라인 기획 및 본문을 연계 작성합니다.
+LangGraph 스타일의 공유 상태(State) 기반 상태 전이 그래프와
+Supervisor-Worker 병렬 분담 및 검증자(Validator) 반려 피드백 루프를 구현한 예제입니다.
 """
-import os
+
+import dataclasses
 import sys
-import time
-import logging
+from typing import List, Dict, Any, Optional
 
-logger = logging.getLogger(__name__)
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
-# google-genai 라이브러리 연동 시도
-try:
-    from google import genai
-    from google.genai import types
-    HAS_GENAI = True
-except ImportError:
-    HAS_GENAI = False
 
-class AgentWorker:
-    """하위 에이전트들의 공통 인터페이스를 정의하는 베이스 클래스"""
+@dataclasses.dataclass
+class WorkflowState:
+    task: str
+    outline: List[str] = dataclasses.field(default_factory=list)
+    draft_sections: Dict[str, str] = dataclasses.field(default_factory=dict)
+    final_article: str = ""
+    review_score: int = 0
+    feedback: str = ""
+    iteration_count: int = 0
 
-    def __init__(self, role: str, system_instruction: str):
-        """에이전트 워커를 초기화합니다.
 
-        :param role: 에이전트의 역할 식별 이름
-        :param system_instruction: 에이전트에 부여할 시스템 지침
-        """
-        self.role = role
-        self.system_instruction = system_instruction
-        self.client = None
+class OutlinePlannerAgent:
+    def run(self, state: WorkflowState) -> WorkflowState:
+        print(f"\n📋 [1. PlannerAgent] 작업 개요 및 목차 설계 중: '{state.task}'")
+        state.outline = [
+            "1. AI IDE 및 Context Engineering 개요",
+            "2. Model Context Protocol (MCP) 표준 아키텍처",
+            "3. Multi-Agent StateGraph 오케스트레이션",
+            "4. 프로덕션 보안 Guardrails 및 관측 가능성"
+        ]
+        return state
+
+
+class SectionWriterAgent:
+    def run(self, state: WorkflowState) -> WorkflowState:
+        print(f"\n✍️ [2. WriterAgent] {len(state.outline)}개 섹션 본문 작성 중...")
+        for sec in state.outline:
+            state.draft_sections[sec] = f"[{sec}]에 대한 심층 기술 설명 및 프로덕션 모범 사례 내용."
+        state.final_article = "\n\n".join([f"### {k}\n{v}" for k, v in state.draft_sections.items()])
+        return state
+
+
+class QualityValidatorAgent:
+    def run(self, state: WorkflowState) -> WorkflowState:
+        state.iteration_count += 1
+        print(f"\n🔍 [3. ValidatorAgent] 품질 및 누락 사항 심사 (시도 #{state.iteration_count})...")
         
-        # GEMINI_API_KEY가 환경 변수에 지정된 경우 실시간 API 연동 준비
-        if HAS_GENAI and os.environ.get("GEMINI_API_KEY"):
-            try:
-                # API Key는 genai.Client가 내부적으로 os.environ["GEMINI_API_KEY"]를 탐색합니다.
-                self.client = genai.Client()
-            except (ValueError, RuntimeError, AttributeError) as e:
-                logger.warning(f"[{self.role}] API 클라이언트 초기화 실패 ({e}). Mock 모드로 대체 실행합니다.")
-                self.client = None
+        if state.iteration_count == 1:
+            state.review_score = 3
+            state.feedback = "보안 및 관측 가능성 섹션에 OpenTelemetry 및 PII 마스킹 언급 보강 필요"
+            print(f"  ⚠️ 심사 결과: {state.review_score}/5점 (반려) -> 피드백: {state.feedback}")
+        else:
+            state.review_score = 5
+            state.feedback = "모든 필수 아키텍처 항목이 완벽하게 반영됨."
+            print(f"  ✅ 심사 결과: {state.review_score}/5점 (승인 완료)!")
+        return state
 
-    def execute(self, prompt: str) -> str:
-        """프롬프트를 실행하고 답변을 리턴합니다 (실제 API 또는 모의 응답)"""
-        print(f"[{self.role}] 작업 지시 수신 중...")
-        time.sleep(1.0) # 생각하는 척 지연시간 부여
-        
-        if self.client:
-            try:
-                # Gemini 2.5 Flash 모델 사용 권장
-                response = self.client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        system_instruction=self.system_instruction,
-                        temperature=0.7,
-                    )
+
+class StateGraphOrchestrator:
+    def __init__(self):
+        self.planner = OutlinePlannerAgent()
+        self.writer = SectionWriterAgent()
+        self.validator = QualityValidatorAgent()
+
+    def run_pipeline(self, task: str) -> WorkflowState:
+        state = WorkflowState(task=task)
+        state = self.planner.run(state)
+
+        while True:
+            state = self.writer.run(state)
+            state = self.validator.run(state)
+
+            if state.review_score >= 4:
+                print("\n🎯 조건부 라우팅 통과: [End Node]로 전이.")
+                break
+            else:
+                print(f"\n🔄 피드백 반영을 위해 [WriterAgent Node]로 회귀...")
+                state.draft_sections["4. 프로덕션 보안 Guardrails 및 관측 가능성"] += (
+                    "\n-> [보강] OpenTelemetry Tracing 및 PII 정규식 마스킹 파이프라인 완비."
                 )
-                return response.text
-            except Exception as e:
-                print(f"[Error] API 호출 오류 ({e}). Mock 데이터로 대체합니다.")
-                return self._get_mock_response(prompt)
-        else:
-            return self._get_mock_response(prompt)
 
-    def _get_mock_response(self, prompt: str) -> str:
-        """API 연동이 불가능할 때 사용할 가상 응답 발전기 (자식 클래스에서 오버라이드)"""
-        return "기본 에이전트 응답 코드"
+        return state
 
 
-class OutlineAgent(AgentWorker):
-    """지정된 주제에 맞는 보고서 목차(Outline)를 구성하는 에이전트"""
-    def __init__(self):
-        super().__init__(
-            role="Outline-Agent",
-            system_instruction="당신은 보고서 기획 전문가입니다. 주어진 주제에 대하여 서론, 본론, 결론을 아우르는 마크다운 목차를 생성하십시오. 서브헤더는 기입하지 마십시오."
-        )
+def main():
+    print("=" * 70)
+    print("🤖 Module 6: Multi-Agent StateGraph & Orchestrator")
+    print("=" * 70)
 
-    def _get_mock_response(self, prompt: str) -> str:
-        print(f"[{self.role}] API 키 미검출 - 가상 목차 데이터 생성")
-        return (
-            "1. 서론: AI 에이전트 오케스트레이션의 부상\n"
-            "2. 본론: 에이전트 협업 설계 패턴 및 프레임워크 비교\n"
-            "3. 결론: 향후 완전 자율 소프트웨어 개발 전망"
-        )
+    task_desc = "엔터프라이즈 AI 엔지니어링 마스터 백서 작성"
+    orchestrator = StateGraphOrchestrator()
+    final_state = orchestrator.run_pipeline(task_desc)
 
-
-class ContentAgent(AgentWorker):
-    """목차의 세부 섹션을 받아 상세 원고를 기술하는 에이전트"""
-    def __init__(self):
-        super().__init__(
-            role="Content-Agent",
-            system_instruction="당신은 전문 리포트 작성가입니다. 목차의 한 주제를 받으면 그에 대한 상세 내용(최소 2~3문단)을 정중한 한글 어조로 서술하십시오."
-        )
-
-    def _get_mock_response(self, prompt: str) -> str:
-        print(f"[{self.role}] API 키 미검출 - 가상 섹션 본문 생성")
-        if "서론" in prompt:
-            return (
-                "최근 AI 엔지니어링 업계에서는 단일 거대 모델의 일회성 응답 한계를 극복하기 위해 다중 에이전트 조율(Orchestration) 시스템이 대두되고 있습니다.\n"
-                "과거 프롬프트 엔지니어링 수준에 머무르던 에이전트들은 이제 파일 읽기, 터미널 실행 등의 자율 도구를 장착하여 워크플로우를 스스로 전개해 나갑니다."
-            )
-        elif "본론" in prompt:
-            return (
-                "멀티 에이전트 협업 구조는 주로 라우터 패턴, 마스터-워커 패턴, 플래너-실행기 패턴으로 나누어 구현됩니다.\n"
-                "LangGraph와 CrewAI 같은 프레임워크는 상태(State)와 규칙 기반 통제를 결합하여 에이전트 간 순환 구조와 안전성을 통제합니다."
-            )
-        else:
-            return (
-                "결론적으로 AI 에이전트 오케스트레이션은 인간 개발자를 완전히 대체하는 것이 아닌, 생산성을 극대화시키는 부조종사 역할을 넘어 자동화 파트너로 발전할 것입니다.\n"
-                "향후에는 보안 및 평가 하네스의 내재화가 이러한 AI 파이프라인 상용화의 핵심 열쇠가 될 것입니다."
-            )
-
-
-class MasterOrchestrator:
-    """하위 에이전트들을 관리 및 호출하여 완성된 하나의 보고서를 조율해 내는 컨트롤러"""
-    def __init__(self):
-        print("[Master] 오케스트레이션 엔진 가동 시작...")
-        self.outline_agent = OutlineAgent()
-        self.content_agent = ContentAgent()
-
-    def run_pipeline(self, topic: str) -> str:
-        print(f"\n[Master] 목표 주제 접수: '{topic}'")
-        
-        # Step 1: 목차 에이전트 소환하여 아웃라인 획득
-        print("\n[Master Step 1] Outline-Agent를 호출하여 보고서 골격을 기획합니다.")
-        outline = self.outline_agent.execute(f"주제: {topic}에 대한 목차를 작성해줘.")
-        print(f"\n[Master] 기획된 목차 수신 완료:\n{outline}\n")
-        
-        # 목차 분리 (라인 단위)
-        sections = [line.strip() for line in outline.strip().split("\n") if line.strip()]
-        
-        # Step 2: 각 목차별 본문 내용 생성 (루프 오케스트레이션)
-        final_document = f"# [Report] {topic} 종합 보고서\n\n"
-        
-        print("[Master Step 2] Content-Agent를 순차 호출하여 세부 섹션 본문을 작성합니다.")
-        for section in sections:
-            print(f"\n[Master] 현재 작성 중인 섹션 -> {section}")
-            section_content = self.content_agent.execute(f"섹션 제목: {section}\n위 섹션에 대한 상세한 본문을 작성해줘.")
-            final_document += f"## {section}\n\n{section_content}\n\n"
-            
-        print("\n[Master Step 3] 모든 섹션이 완료되었습니다. 결과물을 합성합니다.")
-        return final_document
+    print("\n" + "=" * 70)
+    print("🎉 [최종 완성된 멀티 에이전트 산출물]")
+    print(f"  • 최종 점수: {final_state.review_score} / 5")
+    print(f"  • 반복 횟수: {final_state.iteration_count} 회")
+    print(f"  • 본문 요약:\n{final_state.final_article[:250]}...")
+    print("=" * 70)
 
 
 if __name__ == "__main__":
-    # 실행 시 인자로 주제를 주거나, 기본 주제 사용
-    topic = sys.argv[1] if len(sys.argv) > 1 else "AI 에이전트 오케스트레이션 트렌드"
-    
-    # GEMINI_API_KEY 안내 문구
-    if not os.environ.get("GEMINI_API_KEY"):
-        print("*" * 80)
-        print("[Info] 안내: 'GEMINI_API_KEY' 환경 변수가 설정되어 있지 않아 모의(Mock) 에이전트로 시뮬레이션합니다.")
-        print("   실제 API 연동을 원하시면 환경 변수를 설정해 주세요.")
-        print("   예: $env:GEMINI_API_KEY='your-key-here' (PowerShell)")
-        print("*" * 80)
-        
-    orchestrator = MasterOrchestrator()
-    report = orchestrator.run_pipeline(topic)
-    
-    print("\n" + "=" * 40 + " 최종 보고서 출력 " + "=" * 40)
-    print(report)
-    print("=" * 96)
+    main()
