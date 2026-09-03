@@ -33,8 +33,8 @@
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/rag_example.py](file:///c:/Coding/AI-Engineering/examples/rag_example.py)에 작성되어 있습니다.
+이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/07_rag_example.py](file:///c:/Coding/AI-Engineering/examples/07_rag_example.py)에 작성되어 있습니다.
 
 ```bash
-python examples/rag_example.py
+python examples/07_rag_example.py
 ```

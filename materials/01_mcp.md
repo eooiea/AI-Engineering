@@ -51,8 +51,8 @@ Host (IDE) ── (HTTP POST / SSE Stream) ──► 클라우드 원격 MCP 마
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/mcp_server.py](file:///c:/Coding/AI-Engineering/examples/mcp_server.py)에 작성되어 있습니다.
+이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/01_mcp_server.py](file:///c:/Coding/AI-Engineering/examples/01_mcp_server.py)에 작성되어 있습니다.
 
 ```bash
-python examples/mcp_server.py
+python examples/01_mcp_server.py
 ```

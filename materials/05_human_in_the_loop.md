@@ -51,10 +51,10 @@ LangGraph 및 Antigravity IDE의 승인 대화상자(Modal)는 다음과 같은 
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/hitl_example.py](file:///c:/Coding/AI-Engineering/examples/hitl_example.py)에 작성되어 있습니다.
+이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/05_hitl_example.py](file:///c:/Coding/AI-Engineering/examples/05_hitl_example.py)에 작성되어 있습니다.
 
 ```bash
-python examples/hitl_example.py
+python examples/05_hitl_example.py
 ```
 
 ### 핵심 실습 포인트

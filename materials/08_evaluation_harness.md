@@ -41,8 +41,8 @@ LLM 판사에게 모호하게 "평가해줘"라고 요청하면 판사 모델조
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/harness/eval_harness.py](file:///c:/Coding/AI-Engineering/examples/harness/eval_harness.py)에 작성되어 있습니다.
+이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/08_eval_harness.py](file:///c:/Coding/AI-Engineering/examples/08_eval_harness.py)에 작성되어 있습니다.
 
 ```bash
-python examples/harness/eval_harness.py
+python examples/08_eval_harness.py
 ```

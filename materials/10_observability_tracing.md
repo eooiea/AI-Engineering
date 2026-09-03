@@ -38,8 +38,8 @@ Trace: [user_query -> final_response] (Total: 1420ms | Cost: $0.0012)
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/observability_example.py](file:///c:/Coding/AI-Engineering/examples/observability_example.py)에 작성되어 있습니다.
+이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/10_observability_example.py](file:///c:/Coding/AI-Engineering/examples/10_observability_example.py)에 작성되어 있습니다.
 
 ```bash
-python examples/observability_example.py
+python examples/10_observability_example.py
 ```

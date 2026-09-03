@@ -92,8 +92,8 @@ AI IDE는 단순한 챗봇이 아니라, 다음 세 가지 핵심 객체가 긴�
 
 ## 🏋️ 실습 예제 따라하기
 
-이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/context_engineering_example.py](file:///c:/Coding/AI-Engineering/examples/context_engineering_example.py)에 작성되어 있습니다.
+이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/00_context_engineering_example.py](file:///c:/Coding/AI-Engineering/examples/00_context_engineering_example.py)에 작성되어 있습니다.
 
 ```bash
-python examples/context_engineering_example.py
+python examples/00_context_engineering_example.py
 ```
