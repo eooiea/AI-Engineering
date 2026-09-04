@@ -64,6 +64,53 @@ flowchart LR
 * **무한 루프 방지 및 수렴 제어 (Convergence Control)**:
   * 에러가 3회 이상 반복되면 전략을 바꾸거나(Backtracking), 사람에게 에스컬레이션하여 무한 토큰 낭비 방지.
 
+### 3) ⚠️ 프로덕션 루프의 3대 고질병과 서킷 브레이커 (Circuit Breaker)
+
+자율 루프(`Plan-Act-Verify-Retry`)는 이론상 이상적이지만, 실제 프로덕션 환경에서는 **"루프가 수렴하지 않고 영원히 발산(Divergence)하는 치명적 3대 결함"**이 발생합니다:
+
+1. **무한 진동 (Semantic Oscillation / Ping-Pong)**:
+   * 에이전트가 버그 A를 고치면 단위 테스트 B가 깨지고, B를 고치면 다시 버그 A가 재발하는 진동 현상. 단순 재시도 횟수 제한만으로는 원인을 파악하지 못한 채 토큰만 낭비합니다.
+2. **문맥 표류 (Semantic Drift)**:
+   * 실패가 4~5회 누적되는 동안 오류 메시지와 이전 시도 코드가 컨텍스트에 계속 쌓이면서, 에이전트가 본래 사용자의 비즈니스 목표를 망각하고 엉뚱한 리팩토링이나 외부 라이브러리 전체 교체 등 폭주(Overkill)를 시작하는 현상.
+3. **토큰 파산 (Token Bankruptcy)**:
+   * 긴 컨텍스트 윈도우(100k+ 토큰)를 유지한 채 수십 회의 자율 루프를 돌릴 경우, 단 1건의 사용자 요청 처리에 수십 달러의 비용이 청구되고 지연시간이 수 분으로 치솟는 참사.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed : 에이전트 자율 루프 시작
+    
+    state Closed {
+        [*] --> Executing : 정상 태스크 실행
+        Executing --> Verified : 테스트 통과
+        Executing --> Failed : 테스트 실패 (오류 감지)
+        Failed --> Executing : 1~2회 지수 백오프 재시도
+    }
+
+    Closed --> Open : 💥 연속 3회 실패 OR 동일 에러 진동 감지
+    
+    state Open {
+        [*] --> CircuitTrip : 루프 물리적 차단 (Circuit Tripped)
+        CircuitTrip --> Rollback : 🔄 Checkpointer 스냅샷 상태 롤백
+        Rollback --> HumanEscalation : 🚨 Slack 알림 & 인간 승인자(HITL) 호출
+    }
+
+    Open --> HalfOpen : 인간의 힌트 주입 OR 쿨다운(Cooldown) 타이머 만료
+    
+    state HalfOpen {
+        [*] --> CanaryProbe : 격리 샌드박스에서 단 1회 시험 실행
+        CanaryProbe --> Closed : ✅ 시험 통과 (서킷 정상 복귀)
+        CanaryProbe --> Open : ❌ 시험 실패 (다시 서킷 차단)
+    }
+```
+
+#### 엔터프라이즈 루프 복원력(Resilience) 3대 수칙
+* **스냅샷 롤백 (State Rollback with Checkpointer)**:
+  * 루프가 발산하여 코드가 꼬였을 때는 망가진 코드 위에 덧칠하게 두지 않고, LangGraph `SqliteSaver`/`PostgresSaver`의 가장 마지막으로 성공했던 체크포인트 상태로 강제 롤백합니다.
+* **지수 백오프(Exponential Backoff) & 지터(Jitter)**:
+  * 외부 API(Rate Limit, 일시적 네트워크 장애)로 인한 루프 실패 시 즉시 재시도하지 않고, $2^n + \text{random\_jitter}$ 초 동안 대기하여 종속 시스템의 연쇄 붕괴(Cascading Failure)를 방지합니다.
+* **에이전트 카오스 엔지니어링 (Chaos Testing for Agents)**:
+  * 개발 단계에서 일부러 도구 호출 응답을 지연시키거나(Latency Injection), 가짜 에러 응답(Mock Failure)을 주입하여 에이전트가 패닉에 빠지지 않고 정해진 폴백(Fallback) 브랜치로 안전하게 빠져나가는지 사전에 검증합니다.
+
 ---
 
 ## 🕸️ 3. 그래프 엔지니어링 (Graph Engineering)

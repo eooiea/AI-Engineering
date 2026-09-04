@@ -87,6 +87,60 @@ flowchart TD
 
 ---
 
+## 🏢 3. 엔터프라이즈 멀티테넌시 보안 & RBAC 메타데이터 격리
+
+단일 테넌트 토이 프로젝트와 달리, 수만 명의 임직원이 사용하는 사내 RAG 시스템에서는 **권한이 없는 정보의 검색 유출(Information Leakage)**이 가장 치명적인 보안 사고입니다.
+
+```mermaid
+flowchart LR
+    User["👤 인사팀 매니저<br/>(Role: HR, Level: L3)"] --> Query["'임원 성과급 지급 기준' 질의"]
+    Query --> Search["Dense/Sparse 검색 파이프라인"]
+    
+    subgraph "Vector DB (Filter-first Retrieval)"
+        Search --> Filter{"메타데이터 ACL 검증<br/>tenant_id == 'HR'<br/>access_level <= 3"}
+        Filter -- "일치" --> Allow["✅ 허용된 문서 청크만 Vector Match"]
+        Filter -- "불일치" --> Deny["🚫 원천 차단 (검색 대상 제외)"]
+    end
+    
+    Allow --> LLM["🔒 안전한 프롬프트 컨텍스트 주입"]
+```
+
+### Pre-filtering vs Post-filtering 트레이드오프
+* **Pre-filtering (선제적 필터링, 강력 권장)**: 벡터 검색을 수행하기 전에 메타데이터 색인(B-Tree/Inverted Index)을 통해 사용자가 접근 가능한 문서 ID 집합으로 검색 풀을 먼저 좁힌 후 ANN(근사 최근접 이웃) 검색을 수행합니다. 데이터 유출이 원천 차단됩니다.
+* **Post-filtering (사후 필터링)**: 전체 벡터 중 Top-K를 먼저 뽑은 뒤 권한 없는 문서를 버리는 방식입니다. 상위 K개 문서가 전부 권한 밖의 문서인 경우 최종 검색 결과가 0개가 되는 치명적 결함(Recall Collapse)이 발생하므로 엔터프라이즈 환경에서는 금기시됩니다.
+
+---
+
+## ⚡ 4. 수억 건 규모의 대규모 벡터 인덱싱 (Scale-Out Indexing)
+
+문서가 수천만 건을 넘어서면 모든 벡터를 VRAM이나 RAM에 올려두는 것은 천문학적인 클라우드 비용을 유발합니다.
+
+| 기술 요소 | 동작 원리 | 적합한 엔터프라이즈 환경 | 트레이드오프 |
+| :--- | :--- | :--- | :--- |
+| **HNSW ($M, ef$)** | 계층적 작은 세상 그래프(Graph-based) 탐색 | 실시간성 최우선, 초당 수천 QPS 시스템 | RAM 소모량이 매우 큼 (벡터당 오버헤드 1.5~2배) |
+| **DiskANN (Vamana)** | SSD 디스크 기반 압축 그래프 탐색 | 1억 건 이상의 대규모 데이터, 인프라 비용 절감 | RAM 소모량 80% 절감, 디스크 I/O로 인한 약간의 지연 |
+| **PQ / SQ8 양자화** | 32비트 부동소수점 벡터를 8비트/4비트로 압축 | 고밀도 클러스터링 및 대용량 캐싱 | 메모리 75% 절감, 재현율(Recall) 1~3% 미세 손실 |
+
+* **실무 권장 파라미터 (HNSW 기준)**:
+  * `M = 16 ~ 32`: 노드당 연결할 최대 간선 수 (높을수록 재현율 증가, 인덱스 생성 시간/RAM 증가)
+  * `efConstruction = 128 ~ 256`: 인덱스 빌드 시 탐색 깊이
+  * `efSearch = 64 ~ 128`: 런타임 쿼리 시 탐색 깊이 (지연시간과 정확도 조절 레버)
+
+---
+
+## 🔄 5. 데이터 수명 주기: 실시간 캐시 무효화 & 임베딩 드리프트 완화
+
+엔터프라이즈 지식 베이스는 정적이지 않고 매초 수정/삭제됩니다.
+
+1. **실시간 캐시 무효화 (Cache Invalidation & CDC)**:
+   * 사내 Confluence, Notion, 구글 드라이브 문서가 수정되면 **CDC(Change Data Capture, e.g. Debezium, Webhook)** 이벤트가 발행되어 즉시 해당 문서의 모든 청크를 벡터 DB에서 삭제하고 재청킹/재임베딩합니다.
+   * LLM의 **프롬프트 캐시(Prompt Cache)** 역시 문서 해시(Hash)가 변경되는 즉시 무효화(Purge)되어야 최신 정보가 반영됩니다.
+2. **임베딩 드리프트(Embedding Drift)와 듀얼 라이팅(Dual-Writing)**:
+   * 더 뛰어난 임베딩 모델(예: `text-embedding-3-large`에서 차세대 모델)로 업그레이드할 때, 전체 데이터베이스를 즉시 교체하는 것은 시스템 중단을 유발합니다.
+   * **Shadow Indexing & Dual-Write**: 신규 문서는 기존 인덱스와 신규 인덱스 양쪽에 모두 기록하고, 백그라운드 워커가 레거시 벡터를 점진적 변환한 뒤 라우터 스위칭으로 무중단 컷오버(Zero-downtime Cutover)를 수행합니다.
+
+---
+
 ## 🏋️ 실습 예제 따라하기
 
 이 모듈과 연계되는 파이썬 실습 코드 파일은 [examples/07_rag_example.py](file:///c:/Coding/AI-Engineering/examples/07_rag_example.py)에 작성되어 있습니다.
@@ -94,3 +148,4 @@ flowchart TD
 ```bash
 python examples/07_rag_example.py
 ```
+

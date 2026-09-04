@@ -1,13 +1,22 @@
-# 🚀 Antigravity와 함께하는 AI 엔지니어링 마스터 클래스
+# 🚀 Antigravity와 함께하는 엔터프라이즈 에이전트 시스템 & LLMOps 오케스트레이션 마스터 클래스
 
-본 교육 과정은 **Antigravity IDE** 환경에서 엔터프라이즈 AI 엔지니어링의 핵심 4대 계층(**Foundations & Context**, **Core Agent Engine**, **Advanced Orchestration & RAG**, **Production & LLMOps**)을 기초 이론부터 프로덕션 실무 코드까지 마스터할 수 있도록 설계된 종합 커리큘럼입니다.
+본 교육 과정은 **Antigravity IDE** 환경에서 **엔터프라이즈 에이전트 시스템(Agentic Systems) 및 LLMOps 오케스트레이션(Orchestration Engineering)**의 핵심 5대 계층을 기초 이론부터 프로덕션 실무 코드까지 완벽하게 마스터할 수 있도록 설계된 실무 중심 커리큘럼입니다.
+
+> [!NOTE]
+> **엔터프라이즈 AI 시스템 전체 스택 내 본 교육 과정의 좌표**  
+> 글로벌 AI 엔지니어링은 **1) 인프라/서빙 레이어(vLLM, PagedAttention, VRAM)**, **2) 에이전트 오케스트레이션 레이어(Context, MCP, StateGraph, Triad)**, **3) 데이터/미세조정 플라이휠(LoRA, Distillation, DPO)**로 구성됩니다.  
+> 본 커리큘럼은 이 중 가장 복잡하고 비즈니스 부가가치가 높은 **'에이전트 오케스트레이션 및 LLMOps 운영 체계'**를 집중적으로 다루며, 인프라 및 모델 파인튜닝 파이프라인과의 프로덕션 연계 인터페이스를 체계적으로 안내합니다.
 
 ---
 
-## 📅 10단계 커리큘럼 로드맵
+## 📅 커리큘럼 아키텍처 및 5대 계층 로드맵
 
 ```mermaid
 graph TD
+    subgraph "Layer 0: Underlying System & Serving (연계 인프라)"
+        L0["Inference Engine (vLLM / SGLang) & Post-Training (LoRA / DPO)"]
+    end
+
     subgraph "Layer 1: Foundations & Context"
         M0["Module 0: AI IDE Architecture & Context Eng."]
         M1["Module 1: Model Context Protocol (MCP) Mastery"]
@@ -27,7 +36,7 @@ graph TD
     
     subgraph "Layer 4: Production & LLMOps"
         M8["Module 8: Evaluation Harness & LLM-as-a-Judge"]
-        M9["Module 9: Enterprise Guardrails & AI Security"]
+        M9["Module 9: Enterprise Guardrails & Deep Sandbox Security"]
         M10["Module 10: OpenTelemetry LLM Observability & Tracing"]
     end
 
@@ -35,7 +44,10 @@ graph TD
         M11["Module 11: The Modern Triad (Harness, Loop, Graph)"]
     end
 
+    L0 -.->|서빙 엔진 & 가중치 연계| M0
     M0 --> M1 --> M2 --> M3 --> M4 --> M5 --> M6 --> M7 --> M8 --> M9 --> M10 --> M11
+    M11 -.->|운영 피드백 로그 증류| L0
+
     
     style M0 fill:#ffd,stroke:#333,stroke-width:2px
     style M1 fill:#f9f,stroke:#333,stroke-width:2px
@@ -94,7 +106,7 @@ graph TD
 * **실습**: [examples/06_orchestrator.py](file:///c:/Coding/AI-Engineering/examples/06_orchestrator.py) 최신 트렌드(GraphRAG, OTel) 기반 기획자-병렬작성자-검증자 상태 전이 파이프라인.
 
 #### [Module 7: Advanced Hybrid RAG & Vector Pipeline](file:///c:/Coding/AI-Engineering/materials/07_rag_vector_db.md)
-* **이론**: Semantic Chunking, Dense + Sparse(BM25) 하이브리드 검색, Reciprocal Rank Fusion (RRF), Cross-Encoder Re-ranking.
+* **이론**: Semantic Chunking, Dense + Sparse(BM25) 하이브리드 검색, RRF 순위 융합, Cross-Encoder Re-ranking, **멀티테넌시 RBAC 격리, HNSW/DiskANN 대규모 인덱싱, 실시간 캐시 무효화 및 임베딩 드리프트 완화**.
 * **실습**: [examples/07_rag_example.py](file:///c:/Coding/AI-Engineering/examples/07_rag_example.py) RRF 검색 융합 및 Re-ranking을 거친 사실 기반 답변 합성.
 
 ---
@@ -105,8 +117,8 @@ graph TD
 * **이론**: Rule-based Assertions, 1~5점 정량 Rubric 기반 LLM 판사(LLM-as-a-Judge), CI/CD 프롬프트 회귀 테스트.
 * **실습**: [examples/08_eval_harness.py](file:///c:/Coding/AI-Engineering/examples/08_eval_harness.py) 회귀 방지 자동화 채점 하네스.
 
-#### [Module 9: Enterprise Guardrails & AI Security](file:///c:/Coding/AI-Engineering/materials/09_guardrails_security.md)
-* **이론**: Prompt Injection / Jailbreak 탈옥 방어, 전화번호/이메일 등 PII 자동 마스킹, Input/Output 2중 보안 게이트.
+#### [Module 9: Enterprise Guardrails & Deep Sandbox Security](file:///c:/Coding/AI-Engineering/materials/09_guardrails_security.md)
+* **이론**: Dual-Gate (Input/Output), PII 실시간 비식별화, **Firecracker/gVisor 마이크로VM 커널 격리, 네트워크 Egress 차단(C2 유출 방지), RAG 간접 프롬프트 인젝션(Data Poisoning) 방어**.
 * **실습**: [examples/09_guardrails_example.py](file:///c:/Coding/AI-Engineering/examples/09_guardrails_example.py) 주입 공격 차단 및 개인정보 마스킹 파이프라인.
 
 #### [Module 10: OpenTelemetry LLM Observability & Tracing](file:///c:/Coding/AI-Engineering/materials/10_observability_tracing.md)
@@ -118,9 +130,9 @@ graph TD
 ### 🔹 Layer 5: 차세대 통합 패러다임 (The Modern Paradigm)
 
 #### [Module 11: The Modern Agentic Triad (Harness, Loop, & Graph Engineering)](file:///c:/Coding/AI-Engineering/materials/11_modern_agentic_triad.md)
-* **이론**: Prompt/Context를 넘어선 AI 엔지니어링 3대 기둥.
+* **이론**: Prompt/Context를 넘어선 AI 엔지니어링 3대 기둥 및 프로덕션 복원력:
   * **Harness**: 안전 샌드박스 및 프롬프트 회귀 방지 자동 채점 시험장.
-  * **Loop**: 사람의 개입 없이 `Plan-Act-Verify-Retry` 폐루프를 도는 자율 순환계.
+  * **Loop**: Plan-Act-Verify-Retry 폐루프, **무한 진동 및 문맥 표류 방지 서킷 브레이커(Circuit Breaker), 상태 롤백, 카오스 테스트**.
   * **Graph**: 복합 다중 에이전트의 위상(Topology)과 StateGraph 제어 레일.
 * **통합**: 기차 레일(Graph) 위를 달리는 자율 엔진(Loop)과 안전 계측기(Harness)의 삼위일체 아키텍처.
 
