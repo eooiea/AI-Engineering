@@ -1,4 +1,4 @@
-# 🚀 엔터프라이즈 에이전트 시스템 & LLMOps 오케스트레이션 마스터 클래스
+# 🚀 AI 에이전트 엔지니어링 실무 과정 (AI Agent Engineering)
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/Orchestration-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
@@ -7,24 +7,19 @@
 [![OpenTelemetry](https://img.shields.io/badge/Observability-OpenTelemetry-blueviolet.svg?logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-본 저장소는 **Google Antigravity IDE** 환경에서 글로벌 빅테크 수준의 **엔터프라이즈 에이전트 시스템(Agentic Systems) 및 LLMOps 오케스트레이션(Orchestration Engineering)**을 기초 이론부터 프로덕션 실무 코드까지 완벽하게 체득할 수 있도록 구축된 오픈소스 교육 저장소입니다.
+본 저장소는 **Google Antigravity IDE** 환경에서 실무에 바로 적용할 수 있는 **AI 에이전트 시스템(Agentic Systems) 및 오케스트레이션 엔지니어링**의 핵심 원리를 기초 이론부터 실행 가능한 파이썬 예제 코드까지 체계적으로 학습할 수 있도록 구성된 교육용 저장소입니다.
 
 > 🎓 **상세한 주차별 강의 계획 및 학습 목표가 필요하신가요?**  
 > ➡️ [**강의 계획서 (curriculum.md) 바로가기**](curriculum.md)를 확인하세요.
 
 ---
 
-## 📅 아키텍처 로드맵: 5대 핵심 계층 (Layer 1 ~ Layer 5) & 하부 인프라 연계
+## 📅 아키텍처 로드맵: 5대 핵심 계층 (Layer 1 ~ Layer 5)
 
-본 교육 과정은 에이전트 애플리케이션 및 LLMOps의 실질적 핵심인 **5대 계층(Layer 1~5, 총 12개 모듈)**을 집중적으로 다룹니다.  
-하부 인프라(Layer 0)는 본 과정의 직접적인 실습 범위가 아니며, 완성된 에이전트가 호출하고 피드백을 전달하는 **'외부 연계 인프라'**로 위치를 명확히 합니다.
+본 교육 과정은 AI 에이전트 구축 및 운영에 필수적인 **5대 계층(총 12개 모듈)**을 단계별로 다룹니다.
 
 ```mermaid
 graph TD
-    subgraph "Layer 0: External Infra & Serving (외부 연계 인프라 / 본 과정 직접 실습 범위 아님)"
-        L0["Inference Engine (vLLM / SGLang) & Post-Training (LoRA / DPO)<br/><i>*API 및 엔드포인트 연계 대상</i>"]
-    end
-
     subgraph "Layer 1: Foundations & Context"
         M0["Module 0: AI IDE Architecture & Context Eng."]
         M1["Module 1: Model Context Protocol (MCP) Mastery"]
@@ -44,19 +39,16 @@ graph TD
     
     subgraph "Layer 4: Production & LLMOps"
         M8["Module 8: Evaluation Harness & LLM-as-a-Judge"]
-        M9["Module 9: Enterprise Guardrails & Deep Sandbox Security"]
+        M9["Module 9: Agent Guardrails & Security"]
         M10["Module 10: OpenTelemetry LLM Observability & Tracing"]
     end
 
-    subgraph "Layer 5: The Modern Paradigm (2026)"
+    subgraph "Layer 5: The Modern Paradigm"
         M11["Module 11: The Modern Triad (Harness, Loop, Graph)"]
     end
 
-    L0 -.->|서빙 엔진 & VRAM 가중치 연계| M0
     M0 --> M1 --> M2 --> M3 --> M4 --> M5 --> M6 --> M7 --> M8 --> M9 --> M10 --> M11
-    M11 -.->|운영 피드백 로그 증류/미세조정| L0
 
-    style L0 fill:#eceff1,stroke:#607d8b,stroke-dasharray: 5 5
     style M0 fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
     style M1 fill:#f8bbd0,stroke:#c2185b,stroke-width:2px
     style M2 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
@@ -75,10 +67,10 @@ graph TD
 
 ## 📚 12개 핵심 모듈 매트릭스 (Curriculum Matrix)
 
-모든 모듈은 **상세 이론 교재(`materials/`)**와 즉시 실행 가능한 **실전 파이썬 코드(`examples/`)**가 1:1로 완벽하게 매핑되어 있습니다.
+모든 모듈은 **상세 이론 교재(`materials/`)**와 즉시 실행 가능한 **실전 파이썬 코드(`examples/`)**가 1:1로 매핑되어 있습니다.
 
 | 계층 | 모듈 번호 및 주제 | 핵심 기술 스택 | 이론 교재 | 실전 실습 코드 |
-| :--- | :--- | :--- | :---: | :---: |
+| :--- | :--- | :--- | :--- | :---: | :---: |
 | **Layer 1**<br/>(기초 & 컨텍스트) | **Module 0**: AI IDE Architecture & Context Eng. | Prompt Caching, KV-Cache, Context Compaction | [교재 보기](materials/00_context_engineering.md) | [00_context...py](examples/00_context_engineering_example.py) |
 | | **Module 1**: Model Context Protocol (MCP) | FastMCP, Tools/Resources/Prompts, stdio | [교재 보기](materials/01_mcp.md) | [01_mcp_server.py](examples/01_mcp_server.py) |
 | | **Module 2**: Customization & Steering | AGENTS.md, Dynamic Skill, Slash Commands | [교재 보기](materials/02_customization.md) | [.agents/AGENTS.md](.agents/AGENTS.md) |
@@ -86,9 +78,9 @@ graph TD
 | | **Module 4**: Memory & State Persistence | Short/Long-term Memory, Entity Extraction | [교재 보기](materials/04_agent_memory.md) | [04_agent_memory...py](examples/04_agent_memory_example.py) |
 | | **Module 5**: Human-in-the-Loop & Governance | Breakpoints, Dangerous Tool Intercept | [교재 보기](materials/05_human_in_the_loop.md) | [05_hitl_example.py](examples/05_hitl_example.py) |
 | **Layer 3**<br/>(오케스트레이션) | **Module 6**: Multi-Agent StateGraph | LangGraph, Handoff Swarm, Supervisor | [교재 보기](materials/06_multi_agent.md) | [06_orchestrator.py](examples/06_orchestrator.py) |
-| | **Module 7**: Advanced Hybrid RAG & Pipeline | Dense+Sparse BM25, RRF, RBAC, HNSW | [교재 보기](materials/07_rag_vector_db.md) | [07_rag_example.py](examples/07_rag_example.py) |
-| **Layer 4**<br/>(운영 & LLMOps) | **Module 8**: Evaluation Harness & LLM Judge | Deterministic Assertion, Rubric 1~5점 | [교재 보기](materials/08_evaluation_harness.md) | [08_eval_harness.py](examples/08_eval_harness.py) |
-| | **Module 9**: Enterprise Guardrails & Sandbox | Firecracker MicroVM, Egress Drop, PII | [교재 보기](materials/09_guardrails_security.md) | [09_guardrails...py](examples/09_guardrails_example.py) |
+| | **Module 7**: Advanced Hybrid RAG & Pipeline | Dense+Sparse BM25, RRF Ranking, Re-ranking | [교재 보기](materials/07_rag_vector_db.md) | [07_rag_example.py](examples/07_rag_example.py) |
+| **Layer 4**<br/>(운영 & 안정성) | **Module 8**: Evaluation Harness & LLM Judge | Deterministic Assertion, Rubric 채점 | [교재 보기](materials/08_evaluation_harness.md) | [08_eval_harness.py](examples/08_eval_harness.py) |
+| | **Module 9**: Agent Guardrails & Security | Input/Output Dual Gate, PII Masking, Canary | [교재 보기](materials/09_guardrails_security.md) | [09_guardrails...py](examples/09_guardrails_example.py) |
 | | **Module 10**: OpenTelemetry Observability | Distributed Tracing, Spans, Waterfall | [교재 보기](materials/10_observability_tracing.md) | [10_observability...py](examples/10_observability_example.py) |
 | **Layer 5**<br/>(통합 패러다임) | **Module 11**: The Modern Agentic Triad | Circuit Breaker, State Rollback, Triad | [교재 보기](materials/11_modern_agentic_triad.md) | [11_triad_orchestrator.py](examples/11_triad_orchestrator.py) |
 
@@ -108,10 +100,10 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 ### 2. 주요 실습 코드 원클릭 실행
 ```bash
-# [Module 0] 토큰 80% 절약 프롬프트 캐싱 시뮬레이션
+# [Module 0] 토큰 절약 프롬프트 캐싱 메커니즘 시뮬레이션
 python examples/00_context_engineering_example.py
 
-# [Module 3] Pydantic 기반 에러 자가 치유(Self-Healing) 루프
+# [Module 3] Pydantic 기반 에러 자가 치유(Self-Correction) 루프
 python examples/03_structured_outputs_example.py
 
 # [Module 6] LangGraph 기반 기획자-작성자-검증자 오케스트레이터
@@ -122,6 +114,9 @@ python examples/07_rag_example.py
 
 # [Module 8] 3단계 결정론적+LLM 판사 자동 채점 하네스
 python examples/08_eval_harness.py
+
+# [Module 9] 입력 주입 방어 및 출력 PII 마스킹 2중 가드레일
+python examples/09_guardrails_example.py
 
 # [Module 11] 서킷 브레이커 & 하네스 통합 트라이어드 시뮬레이터
 python examples/11_triad_orchestrator.py
