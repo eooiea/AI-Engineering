@@ -29,14 +29,15 @@
 
 ---
 
-## 🏛️ 3. 6대 계층 체계 (Layer 0 ~ Layer 5)
+## 🏛️ 3. 본 과정의 5대 핵심 계층 (Layer 1 ~ Layer 5) & 하부 연계 인프라
 
-본 커리큘럼은 AI 시스템 전체 스택 중 가장 비즈니스 부가가치가 높은 **'오케스트레이션 및 LLMOps 계층(Layer 1~5)'**을 집중 교육하며, 하부 인프라(Layer 0)와의 연계 인터페이스를 명확히 안내합니다.
+본 커리큘럼은 AI 시스템 전체 스택 중 **엔터프라이즈 에이전트 오케스트레이션 및 LLMOps(Layer 1~5, 총 12개 모듈)**을 집중적으로 교육합니다.  
+하부 인프라(Layer 0)는 본 과정에서 직접 가중치를 학습하거나 서빙 클러스터를 구축하는 실습 대상이 아니며, 에이전트 시스템이 호출하고 운영 피드백을 전달하는 **'외부 연계 인프라(Upstream Infrastructure)'**로 명확히 위치를 정의합니다.
 
 ```mermaid
 graph TD
-    subgraph "Layer 0: Underlying System & Serving (연계 인프라)"
-        L0["Inference Engine (vLLM / SGLang) & Post-Training (LoRA / DPO)"]
+    subgraph "Layer 0: External Infra & Serving (외부 연계 인프라 / 본 과정 직접 실습 범위 아님)"
+        L0["Inference Engine (vLLM / SGLang) & Post-Training (LoRA / DPO)<br/><i>*API 및 엔드포인트 연계 대상</i>"]
     end
 
     subgraph "Layer 1: Foundations & Context"

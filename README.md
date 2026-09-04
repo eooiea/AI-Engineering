@@ -14,14 +14,15 @@
 
 ---
 
-## 📅 아키텍처 로드맵: 6대 계층 체계 (Layer 0 ~ Layer 5)
+## 📅 아키텍처 로드맵: 5대 핵심 계층 (Layer 1 ~ Layer 5) & 하부 인프라 연계
 
-현대 AI 엔지니어링 스택은 하부 인프라(Layer 0)부터 시작하여 애플리케이션 오케스트레이션(Layer 1~3), 그리고 운영 및 패러다임(Layer 4~5)으로 유기적으로 연결됩니다.
+본 교육 과정은 에이전트 애플리케이션 및 LLMOps의 실질적 핵심인 **5대 계층(Layer 1~5, 총 12개 모듈)**을 집중적으로 다룹니다.  
+하부 인프라(Layer 0)는 본 과정의 직접적인 실습 범위가 아니며, 완성된 에이전트가 호출하고 피드백을 전달하는 **'외부 연계 인프라'**로 위치를 명확히 합니다.
 
 ```mermaid
 graph TD
-    subgraph "Layer 0: Underlying System & Serving (연계 인프라)"
-        L0["Inference Engine (vLLM / SGLang) & Post-Training (LoRA / DPO)"]
+    subgraph "Layer 0: External Infra & Serving (외부 연계 인프라 / 본 과정 직접 실습 범위 아님)"
+        L0["Inference Engine (vLLM / SGLang) & Post-Training (LoRA / DPO)<br/><i>*API 및 엔드포인트 연계 대상</i>"]
     end
 
     subgraph "Layer 1: Foundations & Context"
