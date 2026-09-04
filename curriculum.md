@@ -31,7 +31,11 @@ graph TD
         M10["Module 10: OpenTelemetry LLM Observability & Tracing"]
     end
 
-    M0 --> M1 --> M2 --> M3 --> M4 --> M5 --> M6 --> M7 --> M8 --> M9 --> M10
+    subgraph "Layer 5: The Modern Paradigm (2026)"
+        M11["Module 11: The Modern Triad (Harness, Loop, Graph)"]
+    end
+
+    M0 --> M1 --> M2 --> M3 --> M4 --> M5 --> M6 --> M7 --> M8 --> M9 --> M10 --> M11
     
     style M0 fill:#ffd,stroke:#333,stroke-width:2px
     style M1 fill:#f9f,stroke:#333,stroke-width:2px
@@ -44,6 +48,7 @@ graph TD
     style M8 fill:#fdf,stroke:#333,stroke-width:2px
     style M9 fill:#ffd,stroke:#333,stroke-width:2px
     style M10 fill:#dff,stroke:#333,stroke-width:2px
+    style M11 fill:#ffe0b2,stroke:#e65100,stroke-width:3px
 ```
 
 ---
@@ -110,12 +115,23 @@ graph TD
 
 ---
 
+### 🔹 Layer 5: 차세대 통합 패러다임 (The Modern Paradigm)
+
+#### [Module 11: The Modern Agentic Triad (Harness, Loop, & Graph Engineering)](file:///c:/Coding/AI-Engineering/materials/11_modern_agentic_triad.md)
+* **이론**: Prompt/Context를 넘어선 AI 엔지니어링 3대 기둥.
+  * **Harness**: 안전 샌드박스 및 프롬프트 회귀 방지 자동 채점 시험장.
+  * **Loop**: 사람의 개입 없이 `Plan-Act-Verify-Retry` 폐루프를 도는 자율 순환계.
+  * **Graph**: 복합 다중 에이전트의 위상(Topology)과 StateGraph 제어 레일.
+* **통합**: 기차 레일(Graph) 위를 달리는 자율 엔진(Loop)과 안전 계측기(Harness)의 삼위일체 아키텍처.
+
+---
+
 ## 📂 디렉토리 구조
 
 ```
 c:\Coding\AI-Engineering\
 ├── curriculum.md                <-- 종합 커리큘럼 (Syllabus)
-├── materials/                   <-- 상세 이론 학습 교재 폴더 (Module 0~10)
+├── materials/                   <-- 상세 이론 학습 교재 폴더 (Module 0~11)
 │   ├── 00_context_engineering.md
 │   ├── 01_mcp.md
 │   ├── 02_customization.md
@@ -126,7 +142,8 @@ c:\Coding\AI-Engineering\
 │   ├── 07_rag_vector_db.md
 │   ├── 08_evaluation_harness.md
 │   ├── 09_guardrails_security.md
-│   └── 10_observability_tracing.md
+│   ├── 10_observability_tracing.md
+│   └── 11_modern_agentic_triad.md  <-- 🌟 차세대 3대 엔지니어링 바이블
 ├── examples/                    <-- 실무 파이썬 실습 코드 폴더 (모듈 번호 일치)
 │   ├── 00_context_engineering_example.py  <-- Module 0: Prompt Caching & 토큰 다이어트
 │   ├── 01_mcp_server.py                   <-- Module 1: FastMCP 표준 서버 (Tools/Resources/Prompts)
@@ -140,7 +157,9 @@ c:\Coding\AI-Engineering\
 │   └── 10_observability_example.py        <-- Module 10: OpenTelemetry Tracing
 └── .agents/                     <-- Antigravity 에이전트 커스텀 시스템
     ├── AGENTS.md                <-- 상시 전역 규칙
+    ├── agents/                  <-- 3대 전문 에이전트 명세 (리서처, 아키텍트, 감사관)
     └── skills/
         ├── review-code/         <-- 코드 리뷰 스킬
         └── commit-msg/          <-- 커밋 메시지 스킬
+```
 ```
