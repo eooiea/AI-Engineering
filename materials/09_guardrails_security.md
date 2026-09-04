@@ -47,11 +47,11 @@ flowchart LR
 
     Sanitize --> FinalUser
 
-    style User fill:#f5f5f5,stroke:#333,stroke-width:2px
-    style InGate fill:#ffebee,stroke:#c62828,stroke-width:2px
-    style OutGate fill:#e8eaf6,stroke:#283593,stroke-width:2px
-    style Agent fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style FinalUser fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style User fill:#f5f5f5,stroke:#333,stroke-width:2px,color:#111111
+    style InGate fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#111111
+    style OutGate fill:#e8eaf6,stroke:#283593,stroke-width:2px,color:#111111
+    style Agent fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#111111
+    style FinalUser fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#111111
 ```
 
 ### 1) 1단계: Input Guardrail (입력 보안)
@@ -108,9 +108,9 @@ flowchart TD
     VM --> Output["실행 결과 표준 출력(stdout)만 추출"]
     Output --> Host["호스트 시스템으로 안전하게 반환"]
 
-    style Shim fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style VM fill:#ffebee,stroke:#c62828,stroke-width:2px
-    style Egress fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+    style Shim fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#111111
+    style VM fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#111111
+    style Egress fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#111111
 ```
 
 ### 3대 엔터프라이즈 에이전트 샌드박스 기술 비교

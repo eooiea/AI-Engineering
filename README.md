@@ -49,18 +49,18 @@ graph TD
 
     M0 --> M1 --> M2 --> M3 --> M4 --> M5 --> M6 --> M7 --> M8 --> M9 --> M10 --> M11
 
-    style M0 fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
-    style M1 fill:#f8bbd0,stroke:#c2185b,stroke-width:2px
-    style M2 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style M3 fill:#bbdefb,stroke:#1976d2,stroke-width:2px
-    style M4 fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px
-    style M5 fill:#ffe0b2,stroke:#f57c00,stroke-width:2px
-    style M6 fill:#d1c4e9,stroke:#512da8,stroke-width:2px
-    style M7 fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px
-    style M8 fill:#b2ebf2,stroke:#0097a7,stroke-width:2px
-    style M9 fill:#ffccbc,stroke:#d84315,stroke-width:2px
-    style M10 fill:#b2dfdb,stroke:#00796b,stroke-width:2px
-    style M11 fill:#ffe082,stroke:#ff8f00,stroke-width:3px
+    style M0 fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#111111
+    style M1 fill:#f8bbd0,stroke:#c2185b,stroke-width:2px,color:#111111
+    style M2 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px,color:#111111
+    style M3 fill:#bbdefb,stroke:#1976d2,stroke-width:2px,color:#111111
+    style M4 fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px,color:#111111
+    style M5 fill:#ffe0b2,stroke:#f57c00,stroke-width:2px,color:#111111
+    style M6 fill:#d1c4e9,stroke:#512da8,stroke-width:2px,color:#111111
+    style M7 fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px,color:#111111
+    style M8 fill:#b2ebf2,stroke:#0097a7,stroke-width:2px,color:#111111
+    style M9 fill:#ffccbc,stroke:#d84315,stroke-width:2px,color:#111111
+    style M10 fill:#b2dfdb,stroke:#00796b,stroke-width:2px,color:#111111
+    style M11 fill:#ffe082,stroke:#ff8f00,stroke-width:3px,color:#111111
 ```
 
 ---

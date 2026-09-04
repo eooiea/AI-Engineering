@@ -51,11 +51,11 @@ flowchart LR
     
     D -- "✅ 성공 (기준 충족)" --> F["🎉 Stop Hook (루프 탈출)"]
 
-    style A fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    style D fill:#ffebee,stroke:#c62828,stroke-width:2px
-    style F fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style A fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#111111
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#111111
+    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#111111
+    style D fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#111111
+    style F fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#111111
 ```
 
 ### 2) 핵심 제어 기술

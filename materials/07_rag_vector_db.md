@@ -12,10 +12,10 @@ flowchart LR
     B --> C["3️⃣ Re-ranking<br/>(Cross-Encoder 재순위화)"]
     C --> D["4️⃣ Grounded Generation<br/>(사실 기반 답변 합성)"]
 
-    style A fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    style D fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style A fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#111111
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#111111
+    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#111111
+    style D fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#111111
 ```
 
 | 단계 | 핵심 기술 | 해결하는 문제 및 역할 |
@@ -68,10 +68,10 @@ flowchart TD
     Search3 --> Reflect
     Reflect -- "✅ 충분 (수치 + 원인 데이터 100% 확보)" --> Final(["🎉 사실 기반 완벽한 분석 보고서 답변 출력"])
 
-    style User fill:#f9fbe7,stroke:#827717,stroke-width:2px
-    style Rewrite fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style Reflect fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Final fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style User fill:#f9fbe7,stroke:#827717,stroke-width:2px,color:#111111
+    style Rewrite fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#111111
+    style Reflect fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#111111
+    style Final fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#111111
 ```
 
 #### 🔍 단계별 작동 상세:

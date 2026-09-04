@@ -62,11 +62,11 @@ flowchart TD
     
     L3 --> Pass["🎉 1~5점 정밀 루브릭 최종 채점표 발행"]
 
-    style A fill:#f5f5f5,stroke:#333,stroke-width:2px
-    style L1 fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style L2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style L3 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    style Pass fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style A fill:#f5f5f5,stroke:#333,stroke-width:2px,color:#111111
+    style L1 fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#111111
+    style L2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#111111
+    style L3 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#111111
+    style Pass fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#111111
 ```
 
 | 계층 | 평가 방식 | 무엇을 검사하는가? | 비용 및 속도 |
